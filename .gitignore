@@ -1,0 +1,19 @@
+# Antigravity / AI Agent Kit (.agent)
+.agents/
+.agents
+agents/
+.agent/
+.shared/
+skills/
+rules/
+workflows/
+scripts/
+tasks/
+ARCHITECTURE.md
+mcp_config.json
+
+# Logs and environment
+*.log
+.env
+.DS_Store
+Thumbs.db
