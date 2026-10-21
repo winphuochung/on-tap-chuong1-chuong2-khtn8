@@ -3,15 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ứng Dụng Học Tập & Phòng Thí Nghiệm 3D Hóa Học 8 - Kết Nối Tri Thức (Bài 2 - Bài 12)</title>
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <title>Ứng Dụng Học Tập & Video Thí Nghiệm Hóa Học 8 - Kết Nối Tri Thức (Bài 2 - Bài 12)</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- KaTeX for LaTeX Equations -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
-  <!-- Three.js for 3D Interactive Chemistry Experiments -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
@@ -29,57 +28,44 @@
     .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-    canvas.lab3d-canvas {
-      display: block;
+    .video-wrapper {
+      position: relative;
+      padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+      height: 0;
+      overflow: hidden;
+    }
+    .video-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
-      cursor: grab;
-    }
-    canvas.lab3d-canvas:active {
-      cursor: grabbing;
-    }
-    .lab3d-labels-layer {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      overflow: hidden;
-      z-index: 10;
-    }
-    .lab3d-pin {
-      position: absolute;
-      transform: translate(-50%, -100%);
-      background: rgba(15, 23, 42, 0.92);
-      color: #f8fafc;
-      padding: 4px 9px;
-      border-radius: 8px;
-      font-size: 11px;
-      font-weight: 700;
-      line-height: 1.25;
-      white-space: nowrap;
-      border: 1.5px solid rgba(56, 189, 248, 0.65);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.45);
-      transition: opacity 0.15s ease;
-    }
-    .lab3d-pin::after {
-      content: '';
-      position: absolute;
-      left: 50%;
-      bottom: -6px;
-      transform: translateX(-50%);
-      border-width: 6px 5px 0 5px;
-      border-style: solid;
-      border-color: rgba(56, 189, 248, 0.75) transparent transparent transparent;
-    }
-    .lab3d-pin .pin-sub {
-      display: block;
-      font-size: 10px;
-      font-weight: 600;
-      color: #bae6fd;
-      margin-top: 1px;
+      border: 0;
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
+  <!-- BANNER CẢNH BÁO PROTOCOL FILE:// (GÂY LỖI YOUTUBE ERROR 153) -->
+  <div id="file-protocol-banner" class="hidden bg-gradient-to-r from-amber-600 via-rose-600 to-indigo-700 text-white px-4 py-2.5 shadow-lg border-b border-rose-300/30">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs md:text-sm">
+      <div class="flex items-center gap-2.5">
+        <span class="text-xl">⚠️</span>
+        <div>
+          <span class="font-bold text-amber-200">Phát hiện mở file trực tiếp (file://):</span>
+          <span> YouTube siết chặt bảo mật và chặn phát video nhúng trên giao thức này (gây <em>Error 153</em>). Để video phát trực tiếp ngay trong ứng dụng, hãy nhấp đúp tệp <strong class="bg-black/40 px-1.5 py-0.5 rounded text-amber-300 border border-amber-400/40 font-mono">CHAY-UNG-DUNG.bat</strong> trong thư mục, hoặc bấm <strong>"Xem trên YouTube"</strong>!</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <button onclick="openLocalServerGuideModal()" class="px-3 py-1.5 bg-white text-slate-900 font-bold rounded-lg hover:bg-slate-100 transition shadow text-xs flex items-center gap-1">
+          💡 Hướng dẫn chi tiết
+        </button>
+        <button onclick="document.getElementById('file-protocol-banner').classList.add('hidden')" class="text-white/80 hover:text-white px-2 py-1 font-bold rounded hover:bg-white/10" title="Đóng thông báo">
+          ✕
+        </button>
+      </div>
+    </div>
+  </div>
+
 
   <!-- HEADER -->
   <header class="bg-gradient-to-r from-indigo-950 via-blue-900 to-teal-800 text-white shadow-lg sticky top-0 z-50">
@@ -89,10 +75,10 @@
         <div>
           <div class="flex items-center gap-2">
             <span class="px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider bg-teal-400/20 text-teal-200 border border-teal-400/40 rounded-full">KHTN 8 • Kết Nối Tri Thức</span>
-            <span class="px-2.5 py-0.5 text-xs font-semibold bg-amber-400/20 text-amber-200 border border-amber-400/40 rounded-full">3D Virtual Lab & 110+ Bài Tập</span>
+            <span class="px-2.5 py-0.5 text-xs font-semibold bg-rose-400/20 text-rose-200 border border-rose-400/40 rounded-full">Video Thí Nghiệm & 110+ Bài Tập</span>
           </div>
           <h1 class="text-lg md:text-xl font-extrabold tracking-tight mt-0.5">
-            Ôn Tập & Phòng Thí Nghiệm 3D Hóa Học 8 (Bài 2 – Bài 12)
+            Ôn Tập & Video Thí Nghiệm Hóa Học 8 (Bài 2 – Bài 12)
           </h1>
         </div>
       </div>
@@ -100,10 +86,10 @@
       <!-- Main Navigation Tabs (ADDIE removed, 3D Lab & Practice enhanced) -->
       <nav class="flex flex-wrap gap-1.5 bg-slate-950/40 p-1.5 rounded-xl border border-white/10">
         <button onclick="switchMainTab('syllabus')" id="tab-btn-syllabus" class="main-tab-btn px-3.5 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 bg-white text-indigo-950 shadow">
-          <i data-lucide="book-open" class="w-4 h-4"></i> Bài Học & Lab 3D (11 Bài)
+          <i data-lucide="book-open" class="w-4 h-4"></i> Bài Học & Thí Nghiệm (11 Bài)
         </button>
         <button onclick="switchMainTab('lab3d')" id="tab-btn-lab3d" class="main-tab-btn px-3.5 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 text-white/90 hover:bg-white/10">
-          <i data-lucide="box" class="w-4 h-4"></i> Phòng Thí Nghiệm 3D
+          <i data-lucide="video" class="w-4 h-4 text-rose-400"></i> Video Thí Nghiệm
         </button>
         <button onclick="switchMainTab('widgets')" id="tab-btn-widgets" class="main-tab-btn px-3.5 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 text-white/90 hover:bg-white/10">
           <i data-lucide="sliders" class="w-4 h-4"></i> Công Cụ & Bảng Tính Tan
@@ -146,111 +132,132 @@
       </div>
     </section>
 
-    <!-- ==================== TAB 2: PHÒNG THÍ NGHIỆM 3D TOÀN MÀN HÌNH (11 BÀI) ==================== -->
+    <!-- ==================== TAB 2: TRUNG TÂM VIDEO THÍ NGHIỆM THỰC HÀNH (11 BÀI) ==================== -->
     <section id="tab-lab3d" class="main-tab-content hidden space-y-6">
       <div class="bg-slate-900 text-white rounded-2xl p-6 shadow-xl border border-slate-800">
         <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
           <div>
             <div class="flex flex-wrap items-center gap-2">
-              <span class="px-2.5 py-1 text-xs font-bold uppercase tracking-wider bg-teal-500/20 text-teal-300 border border-teal-500/30 rounded-full">Phòng Thí Nghiệm Ảo 3D Chuẩn SGK KHTN 8</span>
-              <span class="px-2.5 py-1 text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full">Chú thích 3D trực tiếp • Đo lường thời gian thực</span>
+              <span class="px-2.5 py-1 text-xs font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-full">🎬 Video Thí Nghiệm Thực Tế Chuẩn SGK KHTN 8</span>
+              <span class="px-2.5 py-1 text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full">Hiện tượng thực tế 100% • Trực quan sinh động</span>
             </div>
-            <h2 class="text-2xl font-extrabold mt-1.5" id="full-lab3d-title">Phòng Thí Nghiệm Ảo 3D Tương Tác Chính Xác Cao</h2>
-            <p class="text-xs text-slate-300 mt-0.5">Mọi ống nghiệm, cốc đong, cân điện tử và hóa chất đều gắn nhãn chú thích 3D trực tiếp. Kéo chuột để xoay 360°, cuộn để thu phóng hoặc chọn góc nhìn nhanh bên dưới.</p>
+            <h2 class="text-2xl font-extrabold mt-1.5" id="full-lab3d-title">Trung Tâm Video Thí Nghiệm Hóa Học 8</h2>
+            <p class="text-xs text-slate-300 mt-0.5">Quan sát trực tiếp các thí nghiệm thực hành trên YouTube chuẩn theo từng bài học SGK Kết nối tri thức. Giúp học sinh nắm bắt chính xác hiện tượng đổi màu, kết tủa, thoát khí và tỏa nhiệt.</p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <label class="text-xs font-bold uppercase text-slate-300">Chọn bài thí nghiệm 3D:</label>
-            <select id="full-lab3d-select" onchange="loadLab3DScene(parseInt(this.value), 'full')" class="px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-600 text-white text-sm font-bold outline-none focus:ring-2 focus:ring-teal-400">
+            <label class="text-xs font-bold uppercase text-slate-300">Chọn bài thí nghiệm:</label>
+            <select id="full-lab3d-select" onchange="loadVideoLab(parseInt(this.value))" class="px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-600 text-white text-sm font-bold outline-none focus:ring-2 focus:ring-rose-400">
               <!-- Populated by JS -->
             </select>
           </div>
         </div>
 
-        <!-- Camera & Display Toolbar -->
-        <div class="flex flex-wrap items-center justify-between gap-2 pt-4">
-          <div class="flex flex-wrap items-center gap-1.5">
-            <span class="text-xs font-bold text-slate-400 mr-1">🎥 Góc nhìn Camera:</span>
-            <button onclick="fullLab3D && fullLab3D.setCameraPreset('overview')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-indigo-600 text-xs font-bold text-slate-200 border border-slate-700 transition">
-              Toàn cảnh chuẩn
-            </button>
-            <button onclick="fullLab3D && fullLab3D.setCameraPreset('closeup')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-indigo-600 text-xs font-bold text-slate-200 border border-slate-700 transition">
-              🔍 Cận cảnh ống nghiệm
-            </button>
-            <button onclick="fullLab3D && fullLab3D.setCameraPreset('eyelevel')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-indigo-600 text-xs font-bold text-slate-200 border border-slate-700 transition">
-              📐 Nhìn ngang mực chất lỏng
-            </button>
-            <button onclick="fullLab3D && fullLab3D.setCameraPreset('topdown')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-indigo-600 text-xs font-bold text-slate-200 border border-slate-700 transition">
-              🔭 Nhìn từ trên xuống
-            </button>
-          </div>
-          <div class="flex items-center gap-2">
-            <button onclick="fullLab3D && fullLab3D.toggleLabels()" id="full-lab3d-label-btn" class="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-xs font-bold text-white shadow transition">
-              🏷️ Nhãn chú thích 3D: ĐANG BẬT
-            </button>
-            <button onclick="resetCurrentLab3D()" class="px-3 py-1.5 rounded-lg bg-rose-600/80 hover:bg-rose-600 text-xs font-bold text-white shadow transition">
-              ↺ Làm mới thí nghiệm
-            </button>
-          </div>
-        </div>
-
-        <!-- 3D Viewport & Controls Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-4">
-          <!-- 3D WebGL Canvas Container -->
-          <div class="lg:col-span-8 flex flex-col gap-3">
-            <div class="relative rounded-2xl overflow-hidden bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950 border-2 border-slate-700 h-[480px] shadow-2xl">
-              <div id="full-lab3d-canvas-wrap" class="w-full h-full relative"></div>
-              <!-- Overlay HUD Top -->
-              <div class="absolute top-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2 pointer-events-none z-20">
-                <div id="full-lab3d-badge" class="px-3.5 py-1.5 rounded-xl bg-slate-900/90 backdrop-blur border border-teal-400/40 text-xs font-extrabold text-teal-300 shadow-lg">
-                  🔬 Đang sẵn sàng thí nghiệm
+        <!-- Video Player & Experiment Details Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+          <!-- Video Player Column -->
+          <div class="lg:col-span-8 flex flex-col gap-4">
+            <!-- Responsive 16:9 Video Embed Container -->
+            <div id="video-lab-container" class="relative rounded-2xl overflow-hidden bg-black border-2 border-slate-700 shadow-2xl aspect-video w-full">
+              <iframe id="video-lab-iframe" class="w-full h-full" src="" title="Video thí nghiệm hóa học" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+              <!-- Poster fallback khi chạy qua file:// -->
+              <div id="video-lab-poster" class="hidden absolute inset-0 bg-slate-950 flex flex-col items-center justify-center p-6 text-center z-10 bg-cover bg-center">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/85 to-slate-900/80"></div>
+                <div class="relative z-10 flex flex-col items-center max-w-xl mx-auto space-y-3">
+                  <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-xs font-bold">
+                    <span>🎬 Video Thí Nghiệm Chuẩn SGK Kết Nối Tri Thức</span>
+                  </div>
+                  <h3 id="video-lab-poster-title" class="text-base md:text-xl font-extrabold text-white leading-snug"></h3>
+                  <p class="text-xs text-slate-300 max-w-md">YouTube chặn phát video nhúng trên giao thức <code>file://</code> (Error 153). Bạn có thể bấm để xem trực tiếp hoặc chạy tệp <code>CHAY-UNG-DUNG.bat</code> để phát ngay trong app.</p>
+                  <div class="flex flex-wrap items-center justify-center gap-2.5 pt-2">
+                    <a id="video-lab-poster-play-btn" href="#" target="_blank" rel="noopener noreferrer" class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs md:text-sm shadow-xl flex items-center gap-2 transition transform hover:scale-105">
+                      <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                      Xem video trên YouTube ↗
+                    </a>
+                    <button onclick="toggleForceIframeTab2()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-bold text-xs transition">
+                      📺 Thử phát nhúng trong app
+                    </button>
+                    <button onclick="openLocalServerGuideModal()" class="px-3 py-2.5 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/40 text-indigo-200 font-bold text-xs transition">
+                      🚀 Chạy CHAY-UNG-DUNG.bat
+                    </button>
+                  </div>
                 </div>
-                <div class="px-3 py-1 rounded-xl bg-slate-900/85 text-[11px] font-semibold text-slate-200 border border-white/15">
-                  🖱️ Giữ chuột trái xoay 360° • Con lăn phóng to/nhỏ
-                </div>
-              </div>
-              <!-- Bottom Phenomenon Banner -->
-              <div id="full-lab3d-status" class="absolute bottom-3 left-3 right-3 p-3.5 rounded-xl bg-slate-950/95 backdrop-blur border-l-4 border-teal-400 border-t border-r border-b border-white/15 text-xs md:text-sm text-white font-medium shadow-2xl z-20">
-                Hãy bấm các nút bước thí nghiệm bên phải để quan sát trực quan diễn biến hóa học 3D!
               </div>
             </div>
 
-            <!-- Real-time Telemetry & Chemical Comparison Cards -->
-            <div id="full-lab3d-telemetry" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <!-- Populated dynamically by Lab3DSimulator -->
+            <!-- Video Quick Action Bar -->
+            <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-800/80 p-3.5 rounded-xl border border-slate-700">
+              <div class="flex flex-wrap items-center gap-2" id="video-extra-buttons">
+                <!-- Buttons to switch between main & extra videos if available -->
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <a id="video-direct-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition shadow-md">
+                  <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                  Xem trực tiếp trên YouTube ↗
+                </a>
+                <button onclick="copyCurrentVideoLink()" class="px-3 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-bold transition">
+                  📋 Sao chép link
+                </button>
+                <button onclick="openLocalServerGuideModal()" class="px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition flex items-center gap-1">
+                  💡 Hướng dẫn sửa Error 153
+                </button>
+              </div>
+            </div>
+
+            <!-- Observed Phenomenon Highlight Card -->
+            <div class="bg-gradient-to-r from-emerald-950/80 to-teal-950/80 border border-emerald-500/40 rounded-2xl p-4 shadow-lg">
+              <div class="flex items-center gap-2 text-emerald-400 font-extrabold text-sm mb-1.5">
+                <span>👁️ HIỆN TƯỢNG QUAN SÁT THỰC TẾ TRONG VIDEO:</span>
+              </div>
+              <p id="video-lab-phenomenon" class="text-xs md:text-sm text-emerald-100 leading-relaxed font-medium"></p>
             </div>
           </div>
 
-          <!-- Experiment Control Panel -->
+          <!-- Right Column: Experiment Protocols & Reactions -->
           <div class="lg:col-span-4 flex flex-col justify-between bg-slate-800/90 rounded-2xl p-5 border border-slate-700 space-y-4">
             <div class="space-y-3">
               <div class="flex items-center justify-between">
-                <span class="text-xs font-extrabold uppercase tracking-wider text-amber-300">Bảng điều khiển từng bước</span>
-                <span class="text-[11px] font-semibold text-slate-400">Bấm theo thứ tự 1 → 2 → 3</span>
+                <span class="text-xs font-extrabold uppercase tracking-wider text-amber-300">Chi tiết thí nghiệm</span>
+                <span id="video-lab-sgk-ref" class="text-[11px] font-semibold text-slate-400">SGK KHTN 8</span>
               </div>
-              <h3 id="full-lab3d-exp-name" class="text-lg font-extrabold text-white leading-snug">Tên thí nghiệm</h3>
-              <p id="full-lab3d-exp-desc" class="text-xs text-slate-200 leading-relaxed bg-slate-900/70 p-3 rounded-xl border border-slate-700"></p>
+              <h3 id="video-lab-exp-name" class="text-lg font-extrabold text-white leading-snug">Tên thí nghiệm</h3>
 
-              <!-- Dynamic Action Buttons -->
-              <div id="full-lab3d-buttons" class="space-y-2.5 pt-1">
-                <!-- Populated by JS -->
+              <!-- Apparatus & Chemicals -->
+              <div class="space-y-1.5 text-xs text-slate-300 bg-slate-900/70 p-3 rounded-xl border border-slate-700">
+                <div><strong class="text-teal-300">🧪 Dụng cụ:</strong> <span id="video-lab-apparatus"></span></div>
+                <div class="mt-1"><strong class="text-amber-300">🧴 Hóa chất:</strong> <span id="video-lab-chemicals"></span></div>
+              </div>
+
+              <!-- Steps -->
+              <div class="space-y-1">
+                <div class="text-xs font-bold uppercase text-slate-300">Các bước tiến hành:</div>
+                <ol id="video-lab-steps" class="space-y-1.5 text-xs text-slate-200 list-decimal list-inside bg-slate-900/50 p-3 rounded-xl border border-slate-700"></ol>
               </div>
             </div>
 
             <div class="space-y-3 pt-3 border-t border-slate-700">
-              <div class="text-xs font-bold uppercase text-teal-300">Phương trình & Bản chất hóa học:</div>
-              <div id="full-lab3d-equation" class="p-3.5 rounded-xl bg-slate-950 text-indigo-200 text-xs md:text-sm font-medium overflow-x-auto border border-indigo-500/30"></div>
-              <button onclick="resetCurrentLab3D()" class="w-full py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold transition flex items-center justify-center gap-1.5">
-                ↺ Đặt lại dụng cụ & hóa chất về ban đầu
+              <div class="text-xs font-bold uppercase text-rose-300">Phương trình hóa học:</div>
+              <div id="video-lab-equation" class="p-3 rounded-xl bg-slate-950 text-indigo-200 text-xs md:text-sm font-medium overflow-x-auto border border-indigo-500/30"></div>
+
+              <div id="video-lab-safety" class="text-[11px] text-amber-200/90 bg-amber-950/40 border border-amber-500/30 p-2.5 rounded-xl"></div>
+
+              <button onclick="switchMainTab('quiz'); document.getElementById('quiz-lesson-filter').value=String(currentLessonId); renderQuizBank();" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-teal-600 hover:from-indigo-700 hover:to-teal-700 text-white text-xs font-extrabold shadow transition flex items-center justify-center gap-1.5">
+                ✍️ Luyện tập ngay 10 câu trắc nghiệm của bài này →
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Quick cards to jump between all 11 3D experiments -->
+      <!-- Quick cards grid for all 11 lesson videos -->
       <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-        <h3 class="text-lg font-extrabold text-slate-900 mb-3">Danh Sách 11 Mô Phỏng Thí Nghiệm 3D Đặc Sắc Theo Từng Bài Học</h3>
-        <div id="lab3d-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div>
+            <h3 class="text-lg font-extrabold text-slate-900">Danh Sách 11 Video Thí Nghiệm Thực Tế Theo Từng Bài Học</h3>
+            <p class="text-xs text-slate-500">Bấm vào bất kỳ thẻ bài học nào để mở trực tiếp video thí nghiệm trên YouTube</p>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700">11 Video chuẩn KHTN 8</span>
+        </div>
+        <div id="lab3d-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           <!-- Populated by JS -->
         </div>
       </div>
@@ -589,10 +596,10 @@
   <footer class="bg-slate-900 text-slate-400 text-xs py-5 mt-12">
     <div class="max-w-7xl mx-auto px-4 flex flex-wrap justify-between items-center gap-4">
       <div>
-        <strong class="text-white">Ứng Dụng Ôn Tập & Phòng Thí Nghiệm 3D KHTN 8 (Phân môn Hóa học)</strong> – Bộ sách <em>Kết nối tri thức với cuộc sống</em> (Bài 2 – Bài 12).
+        <strong class="text-white">Ứng Dụng Ôn Tập & Video Thí Nghiệm KHTN 8 (Phân môn Hóa học)</strong> – Bộ sách <em>Kết nối tri thức với cuộc sống</em> (Bài 2 – Bài 12).
       </div>
       <div>
-        Tích hợp <strong>11 Phòng Thí Nghiệm 3D WebGL</strong> & <strong>110+ Bài Tập Tự Luyện</strong>.
+        Tích hợp <strong>11 Video Thí Nghiệm Thực Tế (YouTube)</strong> & <strong>110+ Bài Tập Tự Luyện</strong>.
       </div>
     </div>
   </footer>
@@ -620,15 +627,26 @@
         screenshots: ["Screenshot 2026-10-20 142329.png", "Screenshot 2026-10-20 142336.png", "Screenshot 2026-10-20 142343.png"],
         key_concept: "Biến đổi vật lí vs Biến đổi hoá học, Diễn biến phản ứng & Phản ứng toả nhiệt/thu nhiệt",
         practical_app: "Nhận biết biến đổi hoá học hằng ngày; sử dụng nhiệt đốt cháy nhiên liệu (gas, than, xăng) an toàn, phòng tránh ngộ độc khí CO.",
-        lab3d_meta: {
-          name: "Thí nghiệm 3D: Đun nóng hỗn hợp Sắt (Fe) + Lưu huỳnh (S) & Thử từ tính bằng Nam châm 3D",
-          desc: "Mô phỏng Hình 2.2 SGK: Đưa thanh nam châm 3D lại gần hỗn hợp bột Fe + S trước khi đun (bị hút) và sau khi đun nóng trên ngọn lửa đèn cồn 3D tạo thành hợp chất mới FeS (không còn bị nam châm hút).",
-          equation: "$\\text{Iron (Fe)} + \\text{Sulfur (S)} \\xrightarrow{t^\\circ} \\text{Iron(II) sulfide (FeS)}$",
-          actions: [
-            { id: "magnet_before", label: "🧲 Bước 1: Đưa Nam châm 3D lại gần ống (1) (Chưa đun)" },
-            { id: "heat_fe_s", label: "🔥 Bước 2: Bật đèn cồn 3D đun nóng ống (2) (30 giây)" },
-            { id: "magnet_after", label: "🧲 Bước 3: Đưa Nam châm 3D kiểm tra ống (2) sau khi đun" }
-          ]
+                video_lab: {
+          name: "Thí nghiệm: Sắt tác dụng với lưu huỳnh (Fe + S) & Thử từ tính bằng nam châm",
+          sgk_ref: "Bài 2 - Hình 2.2 SGK KHTN 8 (Trang 13)",
+          youtube_id: "sFajZdg_ans",
+          youtube_url: "https://www.youtube.com/watch?v=sFajZdg_ans",
+          extra_videos: [
+            { title: "Biến đổi vật lí và biến đổi hoá học", id: "C6fHP1d7J8g" }
+          ],
+          apparatus: "Ống nghiệm chịu nhiệt, kẹp gỗ, đèn cồn, muỗng lấy hóa chất, nam châm vĩnh cửu.",
+          chemicals: "Bột sắt (Fe) xám mịn, bột lưu huỳnh (S) vàng tươi (tỉ lệ khối lượng 7 : 4).",
+          steps: [
+            "Trộn đều bột Fe và bột S theo tỉ lệ khối lượng 7 : 4.",
+            "Đưa nam châm lại gần hỗn hợp: các hạt sắt bị nam châm hút mạnh (sắt chưa phản ứng, giữ nguyên từ tính).",
+            "Cho hỗn hợp vào ống nghiệm, dùng đèn cồn hơ đều rồi đun nóng đáy ống nghiệm.",
+            "Khi hỗn hợp bắt đầu nóng đỏ thì ngừng đun; phản ứng tự tiếp tục tỏa nhiều nhiệt sáng rực.",
+            "Để nguội, đập nhẹ đáy ống lấy chất rắn xám đen ra và đưa nam châm lại gần thử."
+          ],
+          phenomenon: "Hỗn hợp cháy đỏ rực, tỏa nhiều nhiệt tạo thành chất rắn màu xám đen là Iron(II) sulfide (FeS). Đưa nam châm lại gần chất rắn mới, nam châm hoàn toàn KHÔNG HÚT (chứng tỏ sắt đã phản ứng tạo chất mới có tính chất khác hẳn chất ban đầu).",
+          equation: "$\\text{Fe} + \\text{S} \\xrightarrow{t^\\circ} \\text{FeS}$",
+          safety_note: "⚠️ Lưu ý an toàn: Đeo kính bảo hộ, hơ nóng đều ống nghiệm trước khi đun tập trung để tránh nứt vỡ thủy tinh."
         },
         objectives: [
           "Phân biệt được biến đổi vật lí (không tạo chất mới) và biến đổi hoá học (có tạo thành chất mới).",
@@ -752,15 +770,25 @@
         screenshots: ["Screenshot 2026-10-20 142350.png", "Screenshot 2026-10-20 142358.png"],
         key_concept: "Số Avogadro (6,022×10²³), Khối lượng mol (M = m/n), Thể tích mol khí ở đkc (24,79 L/mol) & Tỉ khối chất khí (d_A/B = M_A/M_B)",
         practical_app: "Cân hoặc đong lượng chất theo số mol; cảnh báo an toàn khí CO2 tích tụ đáy hang sâu hoặc khí CH4 dưới giếng sâu.",
-        lab3d_meta: {
-          name: "Thí nghiệm 3D: Bình Đo Thể Tích Mol Khí (24,79 L) & Sự Phân Tầng Khí CO₂, CH₄ Trong Không Khí",
-          desc: "Quan sát chuyển động nhiệt của các phân tử khí 3D ở điều kiện chuẩn (25°C, 1 bar) và thả 3 quả cầu khí 3D: Khí CH₄ (M=16, nhẹ hơn không khí bay lên), Không khí (M=29, lơ lửng) và Khí CO₂ (M=44, nặng hơn không khí chìm xuống đáy hang).",
-          equation: "$V_{\\text{đkc}} = 24,79 \\cdot n\\text{ (L)} \\quad ; \\quad d_{\\text{CO}_2/\\text{kk}} = \\dfrac{44}{29} \\approx 1,52 > 1 \\quad ; \\quad d_{\\text{CH}_4/\\text{kk}} = \\dfrac{16}{29} \\approx 0,55 < 1$",
-          actions: [
-            { id: "release_gases", label: "🎈 Bước 1: Thả 3 quả cầu khí CH₄, Không khí và CO₂ trong buồng 3D" },
-            { id: "pump_1mol", label: "⚗️ Bước 2: Bơm 1 mol khí (24,79 Lít ở 25°C, 1 bar) vào bình chuẩn" },
-            { id: "pump_2mol", label: "⚗️ Bước 3: Bơm 2 mol khí (49,58 Lít) – tăng gấp đôi mật độ phân tử" }
-          ]
+                video_lab: {
+          name: "Mô phỏng & Thí nghiệm: Mol, Thể tích mol chất khí (24,79 L) & Tỉ khối chất khí",
+          sgk_ref: "Bài 3 - Trang 16-19 SGK KHTN 8 Kết Nối Tri Thức",
+          youtube_id: "I41i7-l-aEQ",
+          youtube_url: "https://www.youtube.com/watch?v=I41i7-l-aEQ",
+          extra_videos: [
+            { title: "Tỉ khối của chất khí - Phương pháp đo & thu khí", id: "7_he4NnowgI" }
+          ],
+          apparatus: "Bình thu khí, ống dẫn khí, chậu thủy tinh, cân phân tích, bóng bay chứa khí.",
+          chemicals: "Khí Hydrogen (H2), Oxygen (O2), Carbon dioxide (CO2), không khí.",
+          steps: [
+            "Quan sát thể tích của 1 mol bất kì chất khí nào ở điều kiện chuẩn (25 °C, 1 bar) đều chiếm đúng 24,79 lít.",
+            "Thu khí nhẹ hơn không khí (như H2, M = 2 g/mol < 29 g/mol) bằng phương pháp úp ngược bình thu.",
+            "Thu khí nặng hơn không khí (như CO2, M = 44 g/mol; O2, M = 32 g/mol > 29 g/mol) bằng phương pháp ngửa bình thu.",
+            "Rót khí CO2 vào cốc có nến đang cháy: ngọn nến tắt ngay chứng tỏ CO2 nặng hơn không khí và không duy trì sự cháy."
+          ],
+          phenomenon: "Ở đkc (25 °C, 1 bar), 1 mol chất khí bất kì luôn có thể tích bằng 24,79 L. Khí nhẹ hơn không khí (d < 1) bay lên cao, khí nặng hơn không khí (d > 1) chìm xuống đáy bình.",
+          equation: "$V = n \\times 24{,}79\\text{ (L)};\\quad d_{A/B} = \\frac{M_A}{M_B};\\quad d_{A/\\text{kk}} = \\frac{M_A}{29}$",
+          safety_note: "⚠️ Khí H2 dễ bắt cháy và nổ khi trộn với không khí theo tỉ lệ 2:1 thể tích, phải thử độ tinh khiết trước khi thu."
         },
         objectives: [
           "Nêu được khái niệm mol (chứa $N_\\text{A} = 6,022 \\cdot 10^{23}$ nguyên tử hoặc phân tử).",
@@ -876,15 +904,25 @@
         screenshots: ["Screenshot 2026-10-20 142405.png", "Screenshot 2026-10-20 142412.png"],
         key_concept: "Dung dịch, Độ tan (S), Nồng độ phần trăm (C%) & Nồng độ mol (CM)",
         practical_app: "Pha chế 100 gam dung dịch nước muối sinh lí 0,9%; hiểu thành phần dung dịch bù điện giải Oresol và vì sao cá ngoi lên mặt nước ngày nắng nóng.",
-        lab3d_meta: {
-          name: "Thí nghiệm 3D: Hoà Tan & Phân Biệt 4 Cốc Hỗn Hợp (Hình 4.1 SGK)",
-          desc: "Tương tác với 4 cốc thuỷ tinh 3D chứa 20 mL nước: Cốc (1) Muối ăn (trong suốt), Cốc (2) CuSO₄ (dung dịch xanh lam), Cốc (3) Sữa bột (đục - không phải dung dịch), Cốc (4) 4 thìa muối ăn (dung dịch bão hoà có muối rắn lắng đáy).",
-          equation: "$S = \\dfrac{m_{\\text{ct}}}{m_{\\text{nước}}} \\cdot 100 \\quad ; \\quad C\\% = \\dfrac{m_{\\text{ct}}}{m_{\\text{dd}}} \\cdot 100\\% \\quad ; \\quad C_\\text{M} = \\dfrac{n_{\\text{ct}}}{V_{\\text{dd}}}$",
-          actions: [
-            { id: "add_solutes", label: "🥄 Bước 1: Cho các chất rắn vào 4 cốc nước 3D" },
-            { id: "stir_beakers", label: "🔄 Bước 2: Khuấy đều cả 4 cốc trong 2 phút và quan sát" },
-            { id: "heat_beaker4", label: "🔥 Bước 3: Đun nóng nhẹ Cốc (4) để hoà tan lượng muối dư (Tăng độ tan S)" }
-          ]
+                video_lab: {
+          name: "Thí nghiệm: Phân biệt Dung dịch, Huyền phù và Nhũ tương (Hình 4.1 SGK)",
+          sgk_ref: "Bài 4 - Trang 21-23 SGK KHTN 8 Kết Nối Tri Thức",
+          youtube_id: "3tTO2HLKFo8",
+          youtube_url: "https://www.youtube.com/watch?v=3tTO2HLKFo8",
+          extra_videos: [
+            { title: "Nhận biết Dung dịch, Chất tan và Dung môi", id: "Wa8jxI2u51Q" }
+          ],
+          apparatus: "3 cốc thủy tinh 100 mL, đũa khuấy thủy tinh, thìa xúc, đèn laser mini.",
+          chemicals: "Nước cất, đường ăn (sucrose), dầu ăn thực vật, bột sắn dây (hoặc bột đá vôi mịn).",
+          steps: [
+            "Cốc 1: Cho 1 thìa đường vào 50 mL nước cất, khuấy đều. Quan sát độ trong suốt.",
+            "Cốc 2: Cho 1 thìa dầu ăn vào 50 mL nước cất, khuấy mạnh rồi để yên.",
+            "Cốc 3: Cho 1 thìa bột sắn vào 50 mL nước cất, khuấy đều rồi để yên 5 phút.",
+            "Chiếu tia laser qua 3 cốc để quan sát đường đi của ánh sáng (hiệu ứng Tyndall)."
+          ],
+          phenomenon: "Cốc 1: Đường tan hoàn toàn tạo hỗn hợp đồng nhất, trong suốt (Dung dịch). Cốc 2: Dầu ăn không tan, phân tán thành các giọt nhỏ lơ lửng rồi nổi lên trên mặt nước (Nhũ tương). Cốc 3: Các hạt bột rắn phân tán lơ lửng trong nước, để yên sẽ lắng xuống đáy (Huyền phù).",
+          equation: "$C\\% = \\frac{m_{ct}}{m_{dd}} \\times 100\\%;\\quad C_M = \\frac{n}{V\\text{ (L)}}$",
+          safety_note: "⚠️ Khi pha hóa chất dạng bột, tránh hít phải bụi mịn. Không nếm thử bất kì hóa chất nào trong phòng thí nghiệm."
         },
         objectives: [
           "Nêu được khái niệm dung dịch (hỗn hợp lỏng đồng nhất của chất tan và dung môi), dung dịch bão hoà và chưa bão hoà.",
@@ -999,15 +1037,24 @@
         screenshots: ["Screenshot 2026-10-20 142418.png", "Screenshot 2026-10-20 142424.png"],
         key_concept: "Định luật Bảo toàn khối lượng (Lomonosov - Lavoisier), 3 bước lập PTHH & Tỉ lệ số nguyên tử/số mol trong PTHH",
         practical_app: "Tính khối lượng chất chưa biết trong sản xuất; giải thích vì sao xỉ than nhẹ hơn than tổ ong và vì sao vôi sống để lâu ngoài không khí lại tăng khối lượng.",
-        lab3d_meta: {
-          name: "Thí nghiệm 3D: Cân Điện Tử Bảo Toàn Khối Lượng (BaCl₂ + Na₂SO₄ → BaSO₄↓ + 2NaCl)",
-          desc: "Đặt 2 cốc thuỷ tinh chứa dung dịch BaCl₂ (20,8 g) và Na₂SO₄ (14,2 g) trên mặt cân điện tử 3D (tổng chỉ số cân = 35,0 g). Nghiêng cốc (1) rót sang cốc (2) tạo kết tủa trắng BaSO₄↓ nhưng chỉ số cân vẫn giữ nguyên 35,0 g!",
-          equation: "$\\text{BaCl}_2 + \\text{Na}_2\\text{SO}_4 \\longrightarrow \\text{BaSO}_4\\downarrow + 2\\text{NaCl} \\quad (m_{\\text{trước}} = m_{\\text{sau}} = 35,0\\text{ g})$",
-          actions: [
-            { id: "weigh_initial", label: "⚖️ Bước 1: Đặt 2 cốc BaCl₂ và Na₂SO₄ lên mặt cân điện tử 3D" },
-            { id: "pour_bacl2", label: "🧪 Bước 2: Đổ cốc (1) BaCl₂ vào cốc (2) Na₂SO₄ tạo kết tủa trắng BaSO₄↓" },
-            { id: "weigh_final", label: "⚖️ Bước 3: Đặt cốc rỗng trở lại mặt cân & đối chiếu tổng khối lượng" }
-          ]
+                video_lab: {
+          name: "Thí nghiệm: Định luật bảo toàn khối lượng (BaCl2 + Na2SO4 trên cân điện tử)",
+          sgk_ref: "Bài 5 - Hình 5.1 SGK KHTN 8 (Trang 25)",
+          youtube_id: "HHctVwfKwVs",
+          youtube_url: "https://www.youtube.com/watch?v=HHctVwfKwVs",
+          extra_videos: [],
+          apparatus: "Cân điện tử hiện số độ chính xác 0,01 g, bình tam giác, ống nghiệm nhỏ có nút, kẹp.",
+          chemicals: "Dung dịch Barium chloride (BaCl2), dung dịch Sodium sulfate (Na2SO4).",
+          steps: [
+            "Rót khoảng 10 mL dung dịch Na2SO4 vào bình tam giác.",
+            "Rót khoảng 5 mL dung dịch BaCl2 vào ống nghiệm nhỏ.",
+            "Cẩn thận đặt ống nghiệm nhỏ vào trong bình tam giác (chưa để 2 dung dịch trộn lẫn), đậy nút kín.",
+            "Đặt toàn bộ hệ thống lên đĩa cân điện tử và đọc giá trị khối lượng ban đầu (m1).",
+            "Nghiêng bình tam giác cho 2 dung dịch trộn lẫn vào nhau, quan sát hiện tượng và đọc chỉ số cân (m2)."
+          ],
+          phenomenon: "Ngay khi trộn lẫn, xuất hiện kết tủa trắng không tan Barium sulfate (BaSO4). Kim cân điện tử trước và sau phản ứng giữ nguyên giá trị chính xác (m1 = m2). Khối lượng được bảo toàn tuyệt đối!",
+          equation: "$\\text{BaCl}_2 + \\text{Na}_2\\text{SO}_4 \\longrightarrow \\text{BaSO}_4\\downarrow\\text{ (trắng)} + 2\\text{NaCl};\\quad m_{\\text{BaCl}_2} + m_{\\text{Na}_2\\text{SO}_4} = m_{\\text{BaSO}_4} + m_{\\text{NaCl}}$",
+          safety_note: "⚠️ Muối Barium có độc tính nếu nuốt phải, cần rửa sạch tay sau khi làm thí nghiệm."
         },
         objectives: [
           "Tiến hành được thí nghiệm ($\\text{BaCl}_2 + \\text{Na}_2\\text{SO}_4$) chứng minh và phát biểu được Định luật bảo toàn khối lượng.",
@@ -1122,15 +1169,26 @@
         screenshots: ["Screenshot 2026-10-20 142430.png", "Screenshot 2026-10-20 142445.png"],
         key_concept: "4 bước tính lượng chất theo PTHH & Công thức tính Hiệu suất phản ứng (H%)",
         practical_app: "Tính toán lượng nguyên liệu cần nhập và lượng sản phẩm thu được trong sản xuất công nghiệp (nung vôi, luyện gang thép); đánh giá hiệu suất dây chuyền.",
-        lab3d_meta: {
-          name: "Thí nghiệm 3D: Khử Iron(III) Oxide (Fe₂O₃) Bằng Khí H₂ Ở Nhiệt Độ Cao & Tính Hiệu Suất",
-          desc: "Mô phỏng ví dụ trang 27 SGK: Đun nóng 8,0 g bột Fe₂O₃ (màu đỏ nâu) trong ống sứ 3D có dòng khí H₂ đi qua. Bột đỏ nâu chuyển dần thành sắt (Fe) màu xám và xuất hiện những giọt nước ngưng tụ. So sánh lượng Fe thực tế (4,2 g) với lí thuyết (5,6 g) để tính H = 75%.",
-          equation: "$\\text{Fe}_2\\text{O}_3 + 3\\text{H}_2 \\xrightarrow{t^\\circ} 2\\text{Fe} + 3\\text{H}_2\\text{O} \\quad \\left(H = \\dfrac{4,2}{5,6} \\cdot 100\\% = 75\\%\\right)$",
-          actions: [
-            { id: "pass_h2", label: "💨 Bước 1: Dẫn dòng khí H₂ qua ống sứ chứa 8,0 g bột Fe₂O₃ đỏ nâu" },
-            { id: "heat_furnace", label: "🔥 Bước 2: Bật đèn cồn đun nóng ống sứ – phản ứng khử xảy ra" },
-            { id: "weigh_fe_yield", label: "📊 Bước 3: Cân lượng Fe thu được (4,2 g) & tính Hiệu suất H = 75%" }
-          ]
+                video_lab: {
+          name: "Thí nghiệm: Khí Hydrogen khử Copper(II) oxide & Tính theo PTHH (Hiệu suất phản ứng)",
+          sgk_ref: "Bài 6 - Trang 28-31 SGK KHTN 8 Kết Nối Tri Thức",
+          youtube_id: "qEMFsyux4oc",
+          youtube_url: "https://www.youtube.com/watch?v=qEMFsyux4oc",
+          extra_videos: [
+            { title: "Hydrogen khử Fe2O3 và CuO ở nhiệt độ cao", id: "-nc_TuDnePU" }
+          ],
+          apparatus: "Ống nghiệm chịu nhiệt hở hai đầu, đèn cồn, bình điều chế khí H2, ống dẫn khí thủy tinh.",
+          chemicals: "Bột Copper(II) oxide (CuO) màu đen mịn, khí Hydrogen (H2) sinh từ Zn + HCl.",
+          steps: [
+            "Cho một lượng nhỏ bột CuO màu đen vào đáy ống nghiệm dẫn khí.",
+            "Dẫn luồng khí H2 tinh khiết đi qua bột CuO trong khoảng 1 phút để đuổi hết không khí.",
+            "Dùng đèn cồn đốt nóng mạnh phần đáy ống nghiệm chứa bột CuO trong dòng khí H2.",
+            "Quan sát sự đổi màu của chất rắn và sự ngưng tụ hơi nước ở thành ống nghiệm.",
+            "Tắt đèn cồn nhưng vẫn tiếp tục dẫn khí H2 cho đến khi ống nghiệm nguội hẳn."
+          ],
+          phenomenon: "Bột CuO màu đen dần chuyển sang màu đỏ ánh kim của kim loại Đồng (Cu), đồng thời có các giọt nước đọng trên thành ống nghiệm. Đo khối lượng Cu thực tế thu được để tính hiệu suất phản ứng H%.",
+          equation: "$\\text{H}_2 + \\text{CuO} \\xrightarrow{t^\\circ} \\text{Cu}\\text{ (đỏ)} + \\text{H}_2\\text{O};\\quad H = \\frac{m_{tt}}{m_{lt}} \\times 100\\%$",
+          safety_note: "⚠️ Phải dẫn khí H2 một lúc để đuổi hết không khí trước khi châm đèn cồn nhằm tránh nổ hỗn hợp H2 và O2."
         },
         objectives: [
           "Tính được lượng chất tham gia hoặc sản phẩm trong PTHH theo số mol ($n$), khối lượng ($m$) hoặc thể tích khí ($V$) ở $25\\ ^\\circ\\text{C}, 1\\text{ bar}$.",
@@ -1241,16 +1299,25 @@
         screenshots: ["Screenshot 2026-10-20 142452.png", "Screenshot 2026-10-20 142501.png", "Screenshot 2026-10-20 142507.png"],
         key_concept: "Tốc độ phản ứng & 4 yếu tố ảnh hưởng: Nồng độ, Nhiệt độ, Diện tích bề mặt tiếp xúc, Chất xúc tác",
         practical_app: "Bảo quản thực phẩm trong tủ lạnh (giảm nhiệt độ); đập nhỏ đá vôi khi nung (tăng diện tích bề mặt); bộ xúc tác ống xả ô tô giảm khí độc CO, NOx.",
-        lab3d_meta: {
-          name: "Thí nghiệm 3D Đối Chứng: So Sánh 4 Yếu Tố Ảnh Hưởng Đến Tốc Độ Thoát Khí (Hình 7.3, 7.4, 7.5 SGK)",
-          desc: "Quan sát song song 2 ống nghiệm/cốc 3D: Ống Trái (điều kiện thường) và Ống Phải (tăng nồng độ HCl 1M / nước nóng / đá vôi bột / thêm xúc tác bột đen MnO₂ vào H₂O₂). So sánh tốc độ bọt khí 3D thoát ra!",
-          equation: "$2\\text{H}_2\\text{O}_2 \\xrightarrow{\\text{MnO}_2} 2\\text{H}_2\\text{O} + \\text{O}_2\\uparrow \\quad ; \\quad \\text{Fe} + 2\\text{HCl} \\longrightarrow \\text{FeCl}_2 + \\text{H}_2\\uparrow$",
-          actions: [
-            { id: "rate_conc", label: "🧪 Thí nghiệm 1 (Nồng độ): Đinh Fe trong HCl 0,1 M (Trái) vs HCl 1 M (Phải)" },
-            { id: "rate_temp", label: "🌡️ Thí nghiệm 2 (Nhiệt độ): Viên C sủi trong Nước lạnh (Trái) vs Nước nóng (Phải)" },
-            { id: "rate_surface", label: "🪨 Thí nghiệm 3 (Bề mặt): Đá vôi dạng viên (Trái) vs Đá vôi dạng bột (Phải)" },
-            { id: "rate_catalyst", label: "⚡ Thí nghiệm 4 (Xúc tác): H₂O₂ 3% không xúc tác (Trái) vs Có bột MnO₂ (Phải)" }
-          ]
+                video_lab: {
+          name: "Thí nghiệm: Các yếu tố ảnh hưởng đến tốc độ phản ứng (Nồng độ, Nhiệt độ, Xúc tác)",
+          sgk_ref: "Bài 7 - Hình 7.1, 7.2, 7.3, 7.4 SGK KHTN 8 (Trang 32-35)",
+          youtube_id: "eyb_WTdpn1U",
+          youtube_url: "https://www.youtube.com/watch?v=eyb_WTdpn1U",
+          extra_videos: [
+            { title: "Ảnh hưởng của chất xúc tác MnO2 đến phân hủy H2O2", id: "G7EUmYqA_pM" }
+          ],
+          apparatus: "Giá để ống nghiệm, ống nghiệm, đèn cồn, đồng hồ bấm giây, que đóm.",
+          chemicals: "Kẽm hạt (Zn), kẽm bột (Zn), dung dịch HCl 1M và 2M, dung dịch H2O2 (oxy già), bột MnO2.",
+          steps: [
+            "Yếu tố Nồng độ: Cho đồng thời 2 mẩu kẽm cùng khối lượng vào ống (1) chứa HCl 1M và ống (2) chứa HCl 2M.",
+            "Yếu tố Diện tích tiếp xúc: Cho 1 mẩu kẽm viên vào ống (1) và lượng kẽm bột tương đương vào ống (2), cùng thêm HCl 1M.",
+            "Yếu tố Nhiệt độ: Cho 2 mẩu kẽm vào 2 ống chứa cùng lượng HCl 1M, trong đó 1 ống đun nóng.",
+            "Yếu tố Chất xúc tác: Rót 3 mL dung dịch H2O2 vào 2 ống nghiệm, thêm một ít bột MnO2 vào ống (2) và đưa que đóm còn tàn đỏ vào miệng ống."
+          ],
+          phenomenon: "Tốc độ thoát khí H2 tăng khi nồng độ acid cao hơn, diện tích tiếp xúc lớn hơn (dạng bột nhanh hơn hạt) và nhiệt độ cao hơn. Ở thí nghiệm xúc tác, ống thêm MnO2 sủi bọt khí O2 mãnh liệt làm que đóm bùng cháy.",
+          equation: "$\\text{Zn} + 2\\text{HCl} \\longrightarrow \\text{ZnCl}_2 + \\text{H}_2\\uparrow;\\quad 2\\text{H}_2\\text{O}_2 \\xrightarrow{\\text{MnO}_2} 2\\text{H}_2\\text{O} + \\text{O}_2\\uparrow$",
+          safety_note: "⚠️ Phản ứng có xúc tác MnO2 tỏa nhiệt mạnh và sủi bọt rất nhanh, không ghé mắt sát miệng ống nghiệm."
         },
         objectives: [
           "Nêu được khái niệm tốc độ phản ứng (đại lượng đặc trưng cho sự nhanh, chậm của phản ứng hoá học).",
@@ -1371,15 +1438,22 @@
         screenshots: ["Screenshot 2026-10-20 142512.png", "Screenshot 2026-10-20 142520.png", "Screenshot 2026-10-20 142526.png"],
         key_concept: "Khái niệm Acid (tạo ion H⁺), Gốc acid, Tính chất hoá học & Ứng dụng H₂SO₄, HCl, CH₃COOH",
         practical_app: "Loại bỏ cặn trong ấm đun nước bằng giấm ăn hoặc nước chanh; hiểu vai trò của HCl trong dịch vị dạ dày; an toàn khi dùng chất tẩy rửa chứa acid.",
-        lab3d_meta: {
-          name: "Thí nghiệm 3D: Tính Chất Hoá Học Của Dung Dịch Hydrochloric Acid (HCl 1 M) & Vi Mô Ion H⁺",
-          desc: "Tương tác với giá ống nghiệm 3D (Trang 37 SGK): (1) Nhúng mẩu giấy quỳ tím 3D vào HCl (chuyển đỏ); (2) Thả viên kẽm (Zn) và đinh sắt (Fe) vào 2 ống nghiệm chứa HCl 1 M (sủi bọt khí H₂ 3D mạnh mẽ); (3) Bật Kính lúp vi mô 3D quan sát ion H⁺ và Cl⁻.",
-          equation: "$\\text{Zn} + 2\\text{HCl} \\longrightarrow \\text{ZnCl}_2 + \\text{H}_2\\uparrow \\quad ; \\quad \\text{Fe} + 2\\text{HCl} \\longrightarrow \\text{FeCl}_2 + \\text{H}_2\\uparrow$",
-          actions: [
-            { id: "acid_litmus", label: "🟥 Bước 1: Nhỏ dung dịch HCl 1 M lên mẩu giấy quỳ tím 3D" },
-            { id: "acid_metals", label: "🫧 Bước 2: Thả viên Zn và đinh Fe vào 2 ống nghiệm chứa HCl 1 M" },
-            { id: "acid_ions", label: "🔍 Bước 3: Bật chế độ Kính lúp Vi mô 3D xem sự phân li ion H⁺ và gốc acid" }
-          ]
+                video_lab: {
+          name: "Thí nghiệm: Tính chất hoá học của Acid (Làm đổi màu quỳ, tác dụng Zn, hoà tan CuO)",
+          sgk_ref: "Bài 8 - Hình 8.1, 8.2 SGK KHTN 8 (Trang 36-37)",
+          youtube_id: "7joH-j9yOoY",
+          youtube_url: "https://www.youtube.com/watch?v=7joH-j9yOoY",
+          extra_videos: [],
+          apparatus: "Giá để ống nghiệm, ống nghiệm, đĩa sứ thử giọt, ống hút nhỏ giọt, đèn cồn.",
+          chemicals: "Dung dịch Hydrochloric acid (HCl 1M), giấy quỳ tím, mẩu kẽm (Zn), bột Copper(II) oxide (CuO).",
+          steps: [
+            "Bước 1: Nhỏ 1 giọt dung dịch HCl lên mẩu giấy quỳ tím đặt trên đĩa sứ.",
+            "Bước 2: Cho một mẩu kẽm hạt vào ống nghiệm, nhỏ tiếp 2 mL dung dịch HCl vào.",
+            "Bước 3: Cho một ít bột CuO màu đen vào ống nghiệm khác, thêm 2 mL dung dịch HCl và đun nhẹ."
+          ],
+          phenomenon: "Quỳ tím chuyển ngay sang màu ĐỎ. Ống chứa mẩu Zn sủi bọt khí không màu không mùi (H2↑) mãnh liệt. Ống chứa CuO bột đen tan dần tạo dung dịch màu XANH LAM của muối Copper(II) chloride (CuCl2).",
+          equation: "$\\text{Zn} + 2\\text{HCl} \\longrightarrow \\text{ZnCl}_2 + \\text{H}_2\\uparrow;\\quad \\text{CuO}\\text{ (đen)} + 2\\text{HCl} \\longrightarrow \\text{CuCl}_2\\text{ (dung dịch xanh)} + \\text{H}_2\\text{O}$",
+          safety_note: "⚠️ Acid có tính ăn mòn da và vải, nếu dính acid vào tay phải xối ngay dưới vòi nước chảy và rửa bằng dung dịch NaHCO3 loãng."
         },
         objectives: [
           "Nêu được khái niệm acid (phân tử có nguyên tử H liên kết với gốc acid; khi tan trong nước tạo ra ion $\\text{H}^+$).",
@@ -1488,15 +1562,23 @@
         screenshots: ["Screenshot 2026-10-20 142531.png", "Screenshot 2026-10-20 142537.png", "Screenshot 2026-10-20 142543.png"],
         key_concept: "Khái niệm Base (tạo ion OH⁻), Kiềm vs Base không tan, Phản ứng trung hoà & Thang pH (1 – 14)",
         practical_app: "Bôi vôi tôi Ca(OH)₂ vào vết ong/kiến đốt; rắc vôi bột khử chua đất trồng; dùng giấy pH đánh giá độ acid – base của thực phẩm, đất, nước.",
-        lab3d_meta: {
-          name: "Thí nghiệm 3D: Phản Ứng Trung Hoà Giữa NaOH Và HCl Có Chỉ Thị Phenolphthalein (Hình 9.1 SGK)",
-          desc: "Mô phỏng 3 giai đoạn trong Hình 9.1 SGK bằng ống nghiệm và ống nhỏ giọt 3D: (1) Ống nghiệm chứa 1 mL NaOH không màu; (2) Nhỏ 2-3 giọt Phenolphthalein làm dung dịch chuyển sang màu hồng tươi; (3) Nhỏ từ từ dung dịch HCl loãng và lắc đều làm dung dịch mất màu hồng (trở về trong suốt).",
-          equation: "$\\text{NaOH (kiềm)} + \\text{HCl (acid)} \\longrightarrow \\text{NaCl (muối trung tính)} + \\text{H}_2\\text{O}$",
-          actions: [
-            { id: "add_phenol", label: "💧 Bước 1: Nhỏ 2-3 giọt Phenolphthalein vào ống nghiệm đựng NaOH 3D" },
-            { id: "drip_hcl_half", label: "🧪 Bước 2: Nhỏ một phần dung dịch HCl loãng và lắc nhẹ (Màu hồng nhạt dần)" },
-            { id: "drip_hcl_full", label: "✨ Bước 3: Nhỏ vừa đủ HCl để trung hoà hết NaOH (Dung dịch mất màu hồng)" }
-          ]
+                video_lab: {
+          name: "Thí nghiệm: Phản ứng trung hoà Acid - Base (NaOH + HCl với chỉ thị Phenolphthalein)",
+          sgk_ref: "Bài 9 - Hình 9.1 SGK KHTN 8 (Trang 39)",
+          youtube_id: "GyVuMJD4_Is",
+          youtube_url: "https://www.youtube.com/watch?v=GyVuMJD4_Is",
+          extra_videos: [],
+          apparatus: "Bình tam giác 100 mL, buret hoặc ống nhỏ giọt chia vạch, đũa khuấy.",
+          chemicals: "Dung dịch Sodium hydroxide (NaOH 0,1M), dung dịch Hydrochloric acid (HCl 0,1M), chỉ thị phenolphthalein.",
+          steps: [
+            "Cho 10 mL dung dịch NaOH vào bình tam giác, nhỏ thêm 2 giọt dung dịch phenolphthalein.",
+            "Dung dịch lập tức chuyển sang màu hồng cánh sen tươi.",
+            "Dùng ống nhỏ giọt thêm từ từ từng giọt dung dịch HCl vào bình tam giác, vừa nhỏ vừa lắc đều.",
+            "Tiếp tục nhỏ cho đến khi màu hồng của dung dịch vừa mất hẳn (dung dịch chuyển sang không màu)."
+          ],
+          phenomenon: "Dung dịch kiềm làm phenolphthalein hóa hồng đậm. Khi nhỏ dung dịch HCl vào, acid trung hòa base tạo thành muối NaCl và nước. Tại điểm trung hòa hoàn toàn (pH = 7), dung dịch mất màu hồng trở lại không màu.",
+          equation: "$\\text{NaOH} + \\text{HCl} \\longrightarrow \\text{NaCl} + \\text{H}_2\\text{O};\\quad \\text{H}^+ + \\text{OH}^- \\longrightarrow \\text{H}_2\\text{O}$",
+          safety_note: "⚠️ Dung dịch kiềm ăn da mạnh (dính vào tay trơn nhờn và ăn mòn tế bào), cần đeo găng tay cao su khi thực hành."
         },
         objectives: [
           "Nêu được khái niệm base (tạo ion $\\text{OH}^-$), quy tắc gọi tên base và tra bảng tính tan để phân biệt base kiềm với base không tan.",
@@ -1612,15 +1694,23 @@
         screenshots: ["Screenshot 2026-10-20 142552.png", "Screenshot 2026-10-20 142558.png"],
         key_concept: "Khái niệm Oxide, Quy tắc gọi tên (tiền tố/hoá trị) & Phân loại 4 nhóm: Oxide acid, Oxide base, Oxide lưỡng tính, Oxide trung tính",
         practical_app: "Giải thích hiện tượng hố vôi tôi nổi váng trắng (CaCO₃); tẩy gỉ sắt (Fe₂O₃) bằng HCl; hiểu nguyên nhân hiệu ứng nhà kính (CO₂) và mưa acid (SO₂, NO₂).",
-        lab3d_meta: {
-          name: "Thí nghiệm 3D Kép: Sục Khí CO₂ Vào Nước Vôi Trong & Hoà Tan Bột CuO Đen Trong H₂SO₄ Loãng",
-          desc: "Tương tác với 2 hệ thí nghiệm 3D của Bài 10 (Trang 42-43 SGK): (1) Nhỏ HCl vào đá vôi CaCO₃ ở ống (1), dẫn khí CO₂ qua ống thuỷ tinh chữ L sang ống (2) làm đục nước vôi trong Ca(OH)₂; (2) Cho bột CuO màu đen tác dụng với H₂SO₄ loãng tạo dung dịch CuSO₄ màu xanh lam.",
-          equation: "$\\text{Ca(OH)}_2 + \\text{CO}_2 \\longrightarrow \\text{CaCO}_3\\downarrow + \\text{H}_2\\text{O} \\quad ; \\quad \\text{CuO} + \\text{H}_2\\text{SO}_4 \\longrightarrow \\text{CuSO}_4 + \\text{H}_2\\text{O}$",
-          actions: [
-            { id: "oxide_co2", label: "🫧 Thí nghiệm 1 (Oxide acid): Điều chế CO₂ sục qua ống chữ L làm đục nước vôi trong" },
-            { id: "oxide_cuo", label: "💙 Thí nghiệm 2 (Oxide base): Lắc bột CuO màu đen trong H₂SO₄ loãng tạo dung dịch xanh lam" },
-            { id: "oxide_rust", label: "✨ Thí nghiệm 3 (Thực tế): Tẩy lớp gỉ sắt đỏ nâu (Fe₂O₃) bằng dung dịch HCl" }
-          ]
+                video_lab: {
+          name: "Thí nghiệm: Khí CO2 tác dụng với nước vôi trong & Hòa tan bột CuO trong H2SO4",
+          sgk_ref: "Bài 10 - Trang 42-43 SGK KHTN 8 Kết Nối Tri Thức",
+          youtube_id: "rf-aPtk6SAk",
+          youtube_url: "https://www.youtube.com/watch?v=rf-aPtk6SAk",
+          extra_videos: [
+            { title: "Hòa tan bột đen CuO trong H2SO4 loãng tạo dung dịch xanh lam", id: "LyhY-fmF3OU" }
+          ],
+          apparatus: "Ống nghiệm, ống dẫn khí cong chữ L, cốc thủy tinh, kẹp gỗ, đèn cồn.",
+          chemicals: "Nước vôi trong trong suốt (dung dịch Ca(OH)2), khí CO2 (hoặc hơi thở thổi qua ống hút), bột CuO, H2SO4 loãng.",
+          steps: [
+            "Thí nghiệm 1 (Oxide acid): Rót 5 mL dung dịch nước vôi trong Ca(OH)2 vào ống nghiệm. Dẫn khí CO2 vào dung dịch (hoặc dùng ống hút thổi hơi thở vào).",
+            "Thí nghiệm 2 (Oxide base): Cho một ít bột CuO đen vào ống nghiệm, nhỏ 3 mL dung dịch H2SO4 loãng, đun nóng nhẹ đáy ống."
+          ],
+          phenomenon: "TN1: Dung dịch nước vôi trong trong suốt chuyển dần sang vẩn đục màu trắng sữa do xuất hiện kết tủa mịn Calcium carbonate (CaCO3). TN2: Bột CuO đen tan hết tạo dung dịch màu xanh lam đặc trưng của muối Copper(II) sulfate (CuSO4).",
+          equation: "$\\text{CO}_2 + \\text{Ca(OH)}_2 \\longrightarrow \\text{CaCO}_3\\downarrow\\text{ (trắng vẩn đục)} + \\text{H}_2\\text{O};\\quad \\text{CuO} + \\text{H}_2\\text{SO}_4 \\longrightarrow \\text{CuSO}_4\\text{ (xanh lam)} + \\text{H}_2\\text{O}$",
+          safety_note: "⚠️ H2SO4 loãng khi đun nóng có thể bắn tia nếu không cẩn thận, luôn hướng miệng ống nghiệm về phía không có người."
         },
         objectives: [
           "Nêu được khái niệm oxide, quy tắc gọi tên và phân loại được 4 nhóm oxide theo khả năng phản ứng với acid/base.",
@@ -1738,15 +1828,23 @@
         screenshots: ["Screenshot 2026-10-20 142605.png", "Screenshot 2026-10-20 142613.png", "Screenshot 2026-10-20 142619.png"],
         key_concept: "Khái niệm & Danh pháp Muối (Bảng 11.1, 11.2), Bảng tính tan (11.3), 4 tính chất hoá học, Phản ứng trao đổi & Sơ đồ Hình 11.2",
         practical_app: "Phân biệt các hợp chất vô cơ; hiểu quy trình sản xuất muối ăn từ nước biển và muối mỏ; ứng dụng muối trong thực phẩm và công nghiệp.",
-        lab3d_meta: {
-          name: "Thí nghiệm 3D: Giá Đỡ 4 Ống Nghiệm Thử Tính Chất Hoá Học Của Muối (Hình 11.1 SGK)",
-          desc: "Thực hành trực tiếp trên 4 ống nghiệm 3D của Hình 11.1 SGK: Ống (1) Đinh sắt + CuSO₄ (bám đồng đỏ); Ống (2) BaCl₂ + H₂SO₄ (kết tủa trắng BaSO₄↓); Ống (3) BaCl₂ + Na₂SO₄ (kết tủa trắng BaSO₄↓); Ống (4) CuSO₄ + NaOH (kết tủa xanh lam Cu(OH)₂↓).",
-          equation: "$(1)\\ \\text{Fe} + \\text{CuSO}_4 \\rightarrow \\text{FeSO}_4 + \\text{Cu}\\downarrow \\quad ; \\quad (2,3)\\ \\text{Ba}^{2+} + \\text{SO}_4^{2-} \\rightarrow \\text{BaSO}_4\\downarrow \\quad ; \\quad (4)\\ \\text{CuSO}_4 + 2\\text{NaOH} \\rightarrow \\text{Cu(OH)}_2\\downarrow + \\text{Na}_2\\text{SO}_4$",
-          actions: [
-            { id: "salt_tube1", label: "🔩 Ống (1): Nhỏ CuSO₄ vào đinh sắt (Fe đẩy Cu màu đỏ bám lên đinh)" },
-            { id: "salt_tube23", label: "🥛 Ống (2) & (3): Nhỏ H₂SO₄ và Na₂SO₄ vào BaCl₂ (Tạo kết tủa trắng BaSO₄↓)" },
-            { id: "salt_tube4", label: "💎 Ống (4): Nhỏ NaOH vào dung dịch CuSO₄ (Tạo kết tủa xanh lam Cu(OH)₂↓)" }
-          ]
+                video_lab: {
+          name: "Thí nghiệm: Tính chất hoá học của muối (Đinh sắt Fe tác dụng với dung dịch CuSO4)",
+          sgk_ref: "Bài 11 - Hình 11.1 SGK KHTN 8 (Trang 48-50)",
+          youtube_id: "bV9ntYqngfg",
+          youtube_url: "https://www.youtube.com/watch?v=bV9ntYqngfg",
+          extra_videos: [],
+          apparatus: "Ống nghiệm, giá để ống nghiệm, kẹp gắp, giấy nhám đánh bóng.",
+          chemicals: "Đinh sắt sạch (đã đánh bóng bằng giấy nhám), dung dịch Copper(II) sulfate (CuSO4 0,5M) màu xanh lam.",
+          steps: [
+            "Lấy một đinh sắt nhỏ dùng giấy nhám cọ sạch gỉ sét bề mặt để lộ ánh kim xám sáng.",
+            "Rót khoảng 3 - 5 mL dung dịch CuSO4 màu xanh lam vào ống nghiệm.",
+            "Dùng kẹp thả nhẹ đinh sắt vào ống nghiệm chứa dung dịch CuSO4.",
+            "Để yên và quan sát sự biến đổi trên bề mặt đinh sắt và màu sắc của dung dịch sau 5 - 10 phút."
+          ],
+          phenomenon: "Bề mặt đinh sắt chìm trong dung dịch dần được phủ một lớp kim loại màu ĐỎ CAM (đồng kim loại giải phóng bám ngoài). Màu xanh lam của dung dịch CuSO4 nhạt dần do ion Cu2+ chuyển thành ion Fe2+ không màu/xanh rất nhạt.",
+          equation: "$\\text{Fe} + \\text{CuSO}_4\\text{ (xanh)} \\longrightarrow \\text{FeSO}_4\\text{ (nhạt màu)} + \\text{Cu}\\downarrow\\text{ (lớp đỏ bám ngoài)}$",
+          safety_note: "⚠️ Đinh sắt có đầu nhọn cần cầm cẩn thận tránh đâm vào tay. Muối đồng không được đổ trực tiếp ra nguồn nước sinh hoạt."
         },
         objectives: [
           "Nêu được khái niệm về muối, đọc được tên muối thông dụng (Bảng 11.2) và trình bày được 5 phương pháp điều chế muối.",
@@ -1860,16 +1958,24 @@
         screenshots: ["Screenshot 2026-10-20 142623.png", "Screenshot 2026-10-20 142629.png"],
         key_concept: "Nguyên tố đa/trung/vi lượng, Phân đạm (N), Phân lân (P), Phân kali (K), Phân NPK, Quy tắc '4 đúng' & Ủ phân hữu cơ",
         practical_app: "Áp dụng quy tắc '4 đúng' và đeo găng tay/khẩu trang khi bón phân; chọn phân lân phù hợp độ chua của đất; tự làm phân bón hữu cơ tại nhà.",
-        lab3d_meta: {
-          name: "Thí nghiệm 3D: Mô Phỏng Tác Dụng Của Phân Bón N - P - K Lên Cây Trồng & Thùng Ủ Phân Hữu Cơ 5 Lít",
-          desc: "Tương tác với chậu cây 3D và thùng ủ phân hữu cơ (Hình 12.3 SGK): (1) Bón Phân Đạm (N) giúp thân lá vươn cao xanh tốt; (2) Bón Phân Lân (P) giúp bộ rễ phát triển, cây nở hoa và đậu quả; (3) Bón Phân Kali (K) giúp thân cây cứng cáp, phân cành; (4) Mô phỏng thùng ủ 3 kg rác thực vật + 6 g vi sinh Trichoderma – Bacillus.",
-          equation: "$\\text{Đạm (N): } \\text{NH}_4\\text{NO}_3, (\\text{NH}_2)_2\\text{CO} \\quad ; \\quad \\text{Lân (P): } \\text{Ca}_3(\\text{PO}_4)_2, \\text{Ca(H}_2\\text{PO}_4)_2 \\quad ; \\quad \\text{Kali (K): } \\text{KCl}, \\text{K}_2\\text{SO}_4$",
-          actions: [
-            { id: "fert_n", label: "🌿 Bước 1: Bón Phân Đạm (Nitrogen) – Thúc đẩy phát triển thân, lá xanh tốt" },
-            { id: "fert_p", label: "🌸 Bước 2: Bón Phân Lân (Phosphorus) – Phát triển bộ rễ, kích thích nở hoa & đậu quả" },
-            { id: "fert_k_npk", label: "🌳 Bước 3: Bón Phân Kali & NPK tổng hợp – Giúp cây cứng cáp, phân nhiều cành nhánh" },
-            { id: "fert_compost", label: "♻️ Bước 4: Thực hành ủ phân hữu cơ 3D (Rác thực vật + Chế phẩm Trichoderma)" }
-          ]
+                video_lab: {
+          name: "Thí nghiệm & Quan sát: Phân biệt các loại phân bón hoá học (Đạm, Lân, Kali) & Độ tan",
+          sgk_ref: "Bài 12 - Trang 52-54 SGK KHTN 8 Kết Nối Tri Thức",
+          youtube_id: "WSpwhYfviS0",
+          youtube_url: "https://www.youtube.com/watch?v=WSpwhYfviS0",
+          extra_videos: [
+            { title: "Quan sát các mẫu phân đạm, phân lân, phân kali thực tế", id: "l_QOYBjaZIg" }
+          ],
+          apparatus: "3 ống nghiệm hoặc cốc thủy tinh nhỏ, đũa khuấy thủy tinh, thìa xúc, giá để ống nghiệm.",
+          chemicals: "Mẫu phân đạm (đạm urê CO(NH2)2 hoặc đạm amoni NH4NO3), phân lân (supephotphat Ca(H2PO4)2 + CaSO4), phân kali (KCl màu đỏ gạch hoặc trắng), nước cất, vôi tôi Ca(OH)2.",
+          steps: [
+            "Bước 1: Quan sát màu sắc và trạng thái hạt của 3 mẫu phân bón.",
+            "Bước 2: Lấy một lượng nhỏ mỗi loại cho vào 3 ống nghiệm chứa nước cất, dùng đũa khuấy đều để kiểm tra độ tan.",
+            "Bước 3: Trộn một ít phân đạm amoni với bột vôi tôi Ca(OH)2 rồi ngửi nhẹ khí thoát ra."
+          ],
+          phenomenon: "Phân đạm (hạt trắng trong) và phân kali (hạt màu đỏ gạch hoặc trắng) tan nhanh và tan hoàn toàn trong nước. Phân lân (bột màu xám tro) tan rất ít, phần lớn không tan lắng cặn. Phân đạm amoni khi trộn với kiềm/vôi tỏa khí mùi KHAI hắc (khí ammonia NH3↑).",
+          equation: "$\\text{Phân đạm (cung cấp N)};\\quad \\text{Phân lân (cung cấp P)};\\quad \\text{Phân kali (cung cấp K)};\\quad 2\\text{NH}_4^\\text{+} + \\text{Ca(OH)}_2 \\longrightarrow \\text{Ca}^{2+} + 2\\text{NH}_3\\uparrow\\text{ (mùi khai)} + 2\\text{H}_2\\text{O}$",
+          safety_note: "⚠️ Không bón chung phân đạm amoni với vôi sống/vôi tôi vì sẽ làm thất thoát đạm dưới dạng khí NH3 bay đi, giảm hiệu lực của phân."
         },
         objectives: [
           "Trình bày được vai trò của các nhóm nguyên tố dinh dưỡng (đa lượng $\\text{N, P, K}$; trung lượng $\\text{Ca, Mg}$; vi lượng $\\text{Zn, Mn, Fe, Cu}$) đối với cây trồng.",
@@ -2083,1469 +2189,7 @@
     ];
 
     // ===================== ENGINE MÔ PHỎNG THÍ NGHIỆM 3D CHÍNH XÁC CAO (THREE.JS) =====================
-    class Lab3DSimulator {
-      constructor(containerEl, statusEl, badgeEl, telemetryEl = null) {
-        this.container = containerEl;
-        this.statusEl = statusEl;
-        this.badgeEl = badgeEl;
-        this.telemetryEl = telemetryEl;
-        this.lessonId = 2;
-        this.bubbles = [];
-        this.drops = [];
-        this.settlingParticles = [];
-        this.labels = [];
-        this.showLabels = true;
-        this.dynamicObjects = {};
-        this.customUpdaters = [];
-        this.isDragging = false;
-        this.prevMouse = { x: 0, y: 0 };
-        this.cameraAngle = { theta: 0.08, phi: 0.24, radius: 9.2 };
-        this.targetCameraAngle = { theta: 0.08, phi: 0.24, radius: 9.2 };
-        this.lookAtTarget = new THREE.Vector3(0, 0.25, 0);
-
-        this.initThree();
-      }
-
-      initThree() {
-        const w = this.container.clientWidth || 680;
-        const h = this.container.clientHeight || 440;
-
-        this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 100);
-        this.updateCameraPos(true);
-
-        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        this.renderer.setSize(w, h);
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        this.renderer.shadowMap.enabled = true;
-        this.renderer.domElement.className = "lab3d-canvas";
-
-        this.container.innerHTML = "";
-        this.container.appendChild(this.renderer.domElement);
-
-        // Floating 3D-to-2D HTML Pin Labels Layer
-        this.labelsLayer = document.createElement('div');
-        this.labelsLayer.className = "lab3d-labels-layer";
-        this.container.appendChild(this.labelsLayer);
-
-        // High-Contrast Studio Lab Lighting
-        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x334155, 0.95);
-        this.scene.add(hemiLight);
-
-        const mainLight = new THREE.DirectionalLight(0xffffff, 1.15);
-        mainLight.position.set(6, 12, 9);
-        this.scene.add(mainLight);
-
-        const rimLight = new THREE.DirectionalLight(0x38bdf8, 0.55);
-        rimLight.position.set(-8, 6, -5);
-        this.scene.add(rimLight);
-
-        const frontFill = new THREE.PointLight(0xf8fafc, 0.45, 25);
-        frontFill.position.set(0, 3, 8);
-        this.scene.add(frontFill);
-
-        this.rootGroup = new THREE.Group();
-        this.scene.add(this.rootGroup);
-
-        // Mouse & Touch Orbit Controls
-        const dom = this.renderer.domElement;
-        dom.addEventListener('mousedown', (e) => {
-          this.isDragging = true;
-          this.prevMouse = { x: e.clientX, y: e.clientY };
-        });
-        window.addEventListener('mouseup', () => { this.isDragging = false; });
-        window.addEventListener('mousemove', (e) => {
-          if (!this.isDragging) return;
-          const dx = (e.clientX - this.prevMouse.x) * 0.007;
-          const dy = (e.clientY - this.prevMouse.y) * 0.007;
-          this.targetCameraAngle.theta -= dx;
-          this.targetCameraAngle.phi = Math.max(0.04, Math.min(1.15, this.targetCameraAngle.phi + dy));
-          this.prevMouse = { x: e.clientX, y: e.clientY };
-        });
-        dom.addEventListener('wheel', (e) => {
-          e.preventDefault();
-          this.targetCameraAngle.radius = Math.max(5.2, Math.min(14.5, this.targetCameraAngle.radius + e.deltaY * 0.004));
-        }, { passive: false });
-
-        // Touch support
-        dom.addEventListener('touchstart', (e) => {
-          if (e.touches.length === 1) {
-            this.isDragging = true;
-            this.prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-          }
-        }, { passive: true });
-        window.addEventListener('touchend', () => { this.isDragging = false; });
-        window.addEventListener('touchmove', (e) => {
-          if (!this.isDragging || e.touches.length !== 1) return;
-          const dx = (e.touches[0].clientX - this.prevMouse.x) * 0.007;
-          const dy = (e.touches[0].clientY - this.prevMouse.y) * 0.007;
-          this.targetCameraAngle.theta -= dx;
-          this.targetCameraAngle.phi = Math.max(0.04, Math.min(1.15, this.targetCameraAngle.phi + dy));
-          this.prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        }, { passive: true });
-
-        window.addEventListener('resize', () => this.resize());
-        this.animate();
-      }
-
-      setCameraPreset(preset) {
-        if (preset === 'overview') {
-          this.targetCameraAngle = { theta: 0.08, phi: 0.24, radius: 9.2 };
-        } else if (preset === 'closeup') {
-          this.targetCameraAngle = { theta: 0.0, phi: 0.16, radius: 6.3 };
-        } else if (preset === 'eyelevel') {
-          this.targetCameraAngle = { theta: 0.0, phi: 0.05, radius: 8.2 };
-        } else if (preset === 'topdown') {
-          this.targetCameraAngle = { theta: 0.0, phi: 0.88, radius: 9.8 };
-        }
-      }
-
-      toggleLabels() {
-        this.showLabels = !this.showLabels;
-        this.labelsLayer.style.display = this.showLabels ? 'block' : 'none';
-        const btn = document.getElementById('full-lab3d-label-btn');
-        if (btn) {
-          btn.textContent = this.showLabels ? '🏷️ Nhãn chú thích 3D: ĐANG BẬT' : '🏷️ Nhãn chú thích 3D: ĐÃ TẮT';
-          btn.className = this.showLabels
-            ? "px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-xs font-bold text-white shadow transition"
-            : "px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-xs font-bold text-slate-300 shadow transition";
-        }
-      }
-
-      resize() {
-        if (!this.container) return;
-        const w = this.container.clientWidth;
-        const h = this.container.clientHeight;
-        if (w > 0 && h > 0) {
-          this.camera.aspect = w / h;
-          this.camera.updateProjectionMatrix();
-          this.renderer.setSize(w, h);
-        }
-      }
-
-      updateCameraPos(instant = false) {
-        if (instant) {
-          this.cameraAngle.theta = this.targetCameraAngle.theta;
-          this.cameraAngle.phi = this.targetCameraAngle.phi;
-          this.cameraAngle.radius = this.targetCameraAngle.radius;
-        } else {
-          this.cameraAngle.theta += (this.targetCameraAngle.theta - this.cameraAngle.theta) * 0.14;
-          this.cameraAngle.phi += (this.targetCameraAngle.phi - this.cameraAngle.phi) * 0.14;
-          this.cameraAngle.radius += (this.targetCameraAngle.radius - this.cameraAngle.radius) * 0.14;
-        }
-        const { theta, phi, radius } = this.cameraAngle;
-        this.camera.position.x = radius * Math.sin(theta) * Math.cos(phi);
-        this.camera.position.y = radius * Math.sin(phi) + 0.35;
-        this.camera.position.z = radius * Math.cos(theta) * Math.cos(phi);
-        this.camera.lookAt(this.lookAtTarget);
-      }
-
-      // Add a floating 3D-to-2D HTML Pin Label anchored to a 3D coordinate or Object3D
-      addPinLabel({ id, title, sub = "", x = 0, y = 1.5, z = 0, borderColor = "#38bdf8", targetObj = null, offsetY = 0 }) {
-        const el = document.createElement('div');
-        el.className = 'lab3d-pin';
-        el.style.borderColor = borderColor;
-        el.innerHTML = `<span>${title}</span>${sub ? `<span class="pin-sub">${sub}</span>` : ''}`;
-        this.labelsLayer.appendChild(el);
-        const item = { id, el, pos: new THREE.Vector3(x, y, z), targetObj, offsetY };
-        this.labels.push(item);
-        return item;
-      }
-
-      updatePinLabel(id, title, sub = null, borderColor = null) {
-        const item = this.labels.find(l => l.id === id);
-        if (!item) return;
-        const currentSub = sub !== null ? sub : (item.el.querySelector('.pin-sub')?.innerHTML || '');
-        item.el.innerHTML = `<span>${title}</span>${currentSub ? `<span class="pin-sub">${currentSub}</span>` : ''}`;
-        if (borderColor) item.el.style.borderColor = borderColor;
-      }
-
-      projectLabels() {
-        if (!this.showLabels || !this.container) return;
-        const w = this.container.clientWidth;
-        const h = this.container.clientHeight;
-        if (w === 0 || h === 0) return;
-
-        const tempV = new THREE.Vector3();
-        this.labels.forEach(item => {
-          if (item.targetObj) {
-            item.targetObj.getWorldPosition(tempV);
-            tempV.y += item.offsetY;
-          } else {
-            tempV.copy(item.pos);
-          }
-          tempV.project(this.camera);
-          if (tempV.z > 1) {
-            item.el.style.opacity = '0';
-          } else {
-            const px = (tempV.x * 0.5 + 0.5) * w;
-            const py = (-(tempV.y * 0.5) + 0.5) * h;
-            item.el.style.left = `${px}px`;
-            item.el.style.top = `${py}px`;
-            item.el.style.opacity = '1';
-          }
-        });
-      }
-
-      updateTelemetry(cards) {
-        if (!this.telemetryEl || !cards) return;
-        this.telemetryEl.innerHTML = cards.map(c => `
-          <div class="p-3 rounded-xl bg-slate-800/90 border border-slate-700 flex flex-col justify-between">
-            <div class="text-[11px] font-extrabold uppercase tracking-wider ${c.color || 'text-teal-300'}">${c.label}</div>
-            <div class="text-sm font-extrabold text-white mt-1">${c.value}</div>
-            <div class="text-[11px] text-slate-300 mt-0.5">${c.sub || ''}</div>
-          </div>
-        `).join('');
-      }
-
-      // ===================== HIGH-PRECISION 3D APPARATUS BUILDERS =====================
-
-      // 1. Realistic Rounded-Bottom Glass Test Tube OR Flat-Bottom Graduated Beaker
-      createVessel({
-        x = 0, y = -1.2, z = 0,
-        radius = 0.48, height = 2.45,
-        liquidHeight = 1.25, liquidColor = 0x38bdf8, liquidOpacity = 0.68,
-        type = 'tube' // 'tube' (hemispherical bottom) or 'beaker' (flat bottom)
-      }) {
-        const group = new THREE.Group();
-        group.position.set(x, y, z);
-
-        const glassMat = new THREE.MeshPhysicalMaterial({
-          color: 0xf8fafc,
-          transparent: true,
-          opacity: 0.32,
-          roughness: 0.08,
-          metalness: 0.05,
-          side: THREE.DoubleSide,
-          depthWrite: false
-        });
-
-        if (type === 'tube') {
-          // Rounded bottom cap for test tube
-          const cylH = height - radius;
-          const glassCyl = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, cylH, 32, 1, true), glassMat);
-          glassCyl.position.y = radius + cylH / 2;
-          group.add(glassCyl);
-
-          const bottomCap = new THREE.Mesh(
-            new THREE.SphereGeometry(radius, 32, 16, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2),
-            glassMat
-          );
-          bottomCap.position.y = radius;
-          group.add(bottomCap);
-        } else {
-          // Beaker cylinder + flat glass bottom
-          const glassCyl = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, height, 32, 1, true), glassMat);
-          glassCyl.position.y = height / 2;
-          group.add(glassCyl);
-
-          const bottomDisk = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, 0.06, 32), glassMat);
-          bottomDisk.position.y = 0.03;
-          group.add(bottomDisk);
-        }
-
-        // Flared glass rim at top
-        const rimGeo = new THREE.TorusGeometry(radius * 1.02, 0.045, 14, 36);
-        rimGeo.rotateX(Math.PI / 2);
-        const rimMesh = new THREE.Mesh(rimGeo, new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.2 }));
-        rimMesh.position.y = height;
-        group.add(rimMesh);
-
-        // White volume graduation tick marks on front of glass
-        const tickMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.65 });
-        for (let i = 1; i <= 4; i++) {
-          const tickY = (height * 0.18) * i + 0.2;
-          if (tickY < height - 0.2) {
-            const tick = new THREE.Mesh(new THREE.BoxGeometry(i % 2 === 0 ? 0.22 : 0.13, 0.022, 0.01), tickMat);
-            tick.position.set(0, tickY, radius + 0.005);
-            group.add(tick);
-          }
-        }
-
-        // Inner Liquid Column + Top Meniscus
-        const innerR = radius * 0.91;
-        const liqMat = new THREE.MeshStandardMaterial({
-          color: liquidColor,
-          transparent: true,
-          opacity: liquidOpacity,
-          roughness: 0.15
-        });
-
-        const liqGroup = new THREE.Group();
-        const liqCyl = new THREE.Mesh(new THREE.CylinderGeometry(innerR, innerR, Math.max(0.05, liquidHeight), 28), liqMat);
-        liqCyl.position.y = liquidHeight / 2 + (type === 'tube' ? innerR * 0.5 : 0.06);
-        liqGroup.add(liqCyl);
-
-        if (type === 'tube') {
-          const liqBottom = new THREE.Mesh(
-            new THREE.SphereGeometry(innerR, 28, 14, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2),
-            liqMat
-          );
-          liqBottom.position.y = innerR;
-          liqGroup.add(liqBottom);
-        }
-
-        // Bright meniscus surface disk at top of liquid
-        const meniscusMat = new THREE.MeshBasicMaterial({
-          color: liquidColor,
-          transparent: true,
-          opacity: Math.min(0.95, liquidOpacity + 0.18),
-          side: THREE.DoubleSide
-        });
-        const meniscus = new THREE.Mesh(new THREE.CircleGeometry(innerR, 28), meniscusMat);
-        meniscus.rotation.x = -Math.PI / 2;
-        meniscus.position.y = liqCyl.position.y + liquidHeight / 2;
-        liqGroup.add(meniscus);
-
-        group.add(liqGroup);
-
-        // Precipitate / Solid layer at bottom
-        const pptMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.75 });
-        const pptMesh = new THREE.Mesh(
-          type === 'tube'
-            ? new THREE.SphereGeometry(innerR * 0.98, 24, 16, 0, Math.PI * 2, Math.PI * 0.42, Math.PI * 0.58)
-            : new THREE.CylinderGeometry(innerR * 0.98, innerR * 0.98, 0.34, 28),
-          pptMat
-        );
-        pptMesh.position.y = type === 'tube' ? innerR * 1.02 : 0.2;
-        pptMesh.visible = false;
-        group.add(pptMesh);
-
-        this.rootGroup.add(group);
-        return {
-          group, liqGroup, liqMesh: liqCyl, liqMat, meniscus, meniscusMat,
-          pptMesh, pptMat, x, y, z, radius, height, liquidHeight,
-          setLiquidColor: (hex, op = null) => {
-            liqMat.color.setHex(hex);
-            meniscusMat.color.setHex(hex);
-            if (op !== null) {
-              liqMat.opacity = op;
-              meniscusMat.opacity = Math.min(0.96, op + 0.15);
-            }
-          }
-        };
-      }
-
-      // 2. Wooden / Acrylic Test Tube Rack (Giá đỡ ống nghiệm 3D)
-      createTestTubeRack(xPositions, yBase = -1.22, z = 0) {
-        const minX = Math.min(...xPositions) - 0.85;
-        const maxX = Math.max(...xPositions) + 0.85;
-        const width = maxX - minX;
-        const centerX = (minX + maxX) / 2;
-
-        const rackGroup = new THREE.Group();
-        const woodMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.65 });
-        const pillarMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.7 });
-
-        // Base plank
-        const base = new THREE.Mesh(new THREE.BoxGeometry(width, 0.14, 1.35), woodMat);
-        base.position.set(centerX, yBase + 0.07, z);
-        rackGroup.add(base);
-
-        // Side pillars
-        const leftP = new THREE.Mesh(new THREE.BoxGeometry(0.16, 1.45, 1.15), pillarMat);
-        leftP.position.set(minX + 0.12, yBase + 0.8, z);
-        const rightP = new THREE.Mesh(new THREE.BoxGeometry(0.16, 1.45, 1.15), pillarMat);
-        rightP.position.set(maxX - 0.12, yBase + 0.8, z);
-        rackGroup.add(leftP, rightP);
-
-        // Front & Back support bars at middle height
-        const frontBar = new THREE.Mesh(new THREE.BoxGeometry(width, 0.12, 0.12), woodMat);
-        frontBar.position.set(centerX, yBase + 1.35, z + 0.52);
-        const backBar = new THREE.Mesh(new THREE.BoxGeometry(width, 0.12, 0.12), woodMat);
-        backBar.position.set(centerX, yBase + 1.35, z - 0.52);
-        rackGroup.add(frontBar, backBar);
-
-        this.rootGroup.add(rackGroup);
-        return rackGroup;
-      }
-
-      // 3. Realistic 3D Alcohol Burner (Đèn cồn thủy tinh + Bấc + Ngọn lửa 2 tầng)
-      createAlcoholBurner(x, y = -1.22, z = 0) {
-        const burnerGroup = new THREE.Group();
-        burnerGroup.position.set(x, y, z);
-
-        // Glass body with blue alcohol inside
-        const bodyGlass = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.42, 0.58, 0.62, 24),
-          new THREE.MeshPhysicalMaterial({ color: 0xbae6fd, transparent: true, opacity: 0.65, roughness: 0.15 })
-        );
-        bodyGlass.position.y = 0.31;
-        burnerGroup.add(bodyGlass);
-
-        // Metal collar + wick
-        const collar = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.14, 0.18, 0.18, 18),
-          new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.7, roughness: 0.3 })
-        );
-        collar.position.y = 0.68;
-        burnerGroup.add(collar);
-
-        const wick = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.04, 0.04, 0.22, 12),
-          new THREE.MeshStandardMaterial({ color: 0xf8fafc })
-        );
-        wick.position.y = 0.82;
-        burnerGroup.add(wick);
-
-        // Multi-layered Flame Group
-        const flameGroup = new THREE.Group();
-        flameGroup.position.y = 0.9;
-        const outerFlame = new THREE.Mesh(
-          new THREE.ConeGeometry(0.28, 0.82, 20),
-          new THREE.MeshBasicMaterial({ color: 0xf97316, transparent: true, opacity: 0.88 })
-        );
-        outerFlame.position.y = 0.35;
-        const innerFlame = new THREE.Mesh(
-          new THREE.ConeGeometry(0.15, 0.5, 16),
-          new THREE.MeshBasicMaterial({ color: 0xfef08a })
-        );
-        innerFlame.position.y = 0.22;
-        const flameLight = new THREE.PointLight(0xf97316, 1.4, 5);
-        flameLight.position.y = 0.45;
-        flameGroup.add(outerFlame, innerFlame, flameLight);
-        flameGroup.visible = false;
-        burnerGroup.add(flameGroup);
-
-        this.rootGroup.add(burnerGroup);
-        return { burnerGroup, flameGroup, outerFlame, innerFlame };
-      }
-
-      // 4. Realistic 3D Dropper Pipette (Ống nhỏ giọt + hiệu ứng giọt chất lỏng rơi thực tế)
-      createDropper(x, y, z = 0, bulbColor = 0xef4444) {
-        const group = new THREE.Group();
-        group.position.set(x, y, z);
-
-        // Rubber bulb
-        const bulb = new THREE.Mesh(
-          new THREE.SphereGeometry(0.18, 16, 16),
-          new THREE.MeshStandardMaterial({ color: bulbColor, roughness: 0.5 })
-        );
-        bulb.scale.set(1, 1.45, 1);
-        bulb.position.y = 0.55;
-        group.add(bulb);
-
-        // Glass tube stem
-        const stem = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.08, 0.025, 0.85, 16),
-          new THREE.MeshPhysicalMaterial({ color: 0xf8fafc, transparent: true, opacity: 0.65, roughness: 0.1 })
-        );
-        stem.position.y = 0.0;
-        group.add(stem);
-
-        this.rootGroup.add(group);
-        return { group, bulb, stem };
-      }
-
-      // Drop liquid droplets from a dropper to targetY and execute callback on hit
-      dripLiquid({ x, startY, targetY, color = 0xec4899, count = 3, onComplete = null }) {
-        for (let i = 0; i < count; i++) {
-          setTimeout(() => {
-            const dropMesh = new THREE.Mesh(
-              new THREE.SphereGeometry(0.08, 12, 12),
-              new THREE.MeshStandardMaterial({ color, roughness: 0.2 })
-            );
-            dropMesh.scale.set(0.85, 1.3, 0.85);
-            dropMesh.position.set(x, startY, 0);
-            this.rootGroup.add(dropMesh);
-            this.drops.push({
-              mesh: dropMesh,
-              targetY,
-              speed: 0.075,
-              isLast: i === count - 1,
-              onComplete
-            });
-          }, i * 220);
-        }
-      }
-
-      // 5. Realistic 3D Digital Electronic Balance with Dynamic LCD Display Texture
-      createDigitalScale(x = 0, y = -1.22, z = 0, initialText = "35.00 g") {
-        const group = new THREE.Group();
-        group.position.set(x, y, z);
-
-        // Scale body
-        const body = new THREE.Mesh(
-          new THREE.BoxGeometry(5.4, 0.42, 3.0),
-          new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.35, metalness: 0.3 })
-        );
-        body.position.y = 0.21;
-        group.add(body);
-
-        // Stainless steel weighing pan
-        const pan = new THREE.Mesh(
-          new THREE.BoxGeometry(4.8, 0.08, 2.3),
-          new THREE.MeshStandardMaterial({ color: 0xcbd5e1, metalness: 0.75, roughness: 0.2 })
-        );
-        pan.position.y = 0.46;
-        group.add(pan);
-
-        // Front LCD Screen using CanvasTexture
-        const canvas = document.createElement('canvas');
-        canvas.width = 512;
-        canvas.height = 128;
-        const ctx = canvas.getContext('2d');
-        const tex = new THREE.CanvasTexture(canvas);
-
-        const drawLCD = (text) => {
-          ctx.fillStyle = '#064e3b';
-          ctx.fillRect(0, 0, 512, 128);
-          ctx.strokeStyle = '#10b981';
-          ctx.lineWidth = 6;
-          ctx.strokeRect(4, 4, 504, 120);
-          ctx.fillStyle = '#34d399';
-          ctx.font = 'bold 68px monospace';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(text, 256, 66);
-          tex.needsUpdate = true;
-        };
-        drawLCD(initialText);
-
-        const screenMesh = new THREE.Mesh(
-          new THREE.PlaneGeometry(2.1, 0.48),
-          new THREE.MeshBasicMaterial({ map: tex })
-        );
-        screenMesh.position.set(0, 0.22, 1.52);
-        group.add(screenMesh);
-
-        this.rootGroup.add(group);
-        return { group, setReading: drawLCD };
-      }
-
-      // Spawn rising gas bubbles inside a vessel
-      spawnBubbles(x, count = 20, speed = 0.025, color = 0xffffff, minY = -0.95, maxY = 0.2, spread = 0.42) {
-        const geo = new THREE.SphereGeometry(0.055, 12, 12);
-        const mat = new THREE.MeshStandardMaterial({
-          color,
-          transparent: true,
-          opacity: 0.9,
-          roughness: 0.1
-        });
-        for (let i = 0; i < count; i++) {
-          const b = new THREE.Mesh(geo, mat);
-          b.position.set(
-            x + (Math.random() - 0.5) * spread,
-            minY + Math.random() * (maxY - minY),
-            (Math.random() - 0.5) * spread
-          );
-          this.rootGroup.add(b);
-          this.bubbles.push({
-            mesh: b,
-            baseX: x,
-            speed: speed * (0.75 + Math.random() * 0.5),
-            minY,
-            maxY,
-            spread
-          });
-        }
-      }
-
-      // Spawn flocculent precipitate particles that settle down to the bottom of a vessel
-      spawnSettlingPrecipitate(x, count = 28, color = 0xffffff, startY = 0.0, bottomY = -0.85, spread = 0.5) {
-        const geo = new THREE.SphereGeometry(0.06, 10, 10);
-        const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.8, transparent: true, opacity: 0.92 });
-        for (let i = 0; i < count; i++) {
-          const p = new THREE.Mesh(geo, mat);
-          p.position.set(
-            x + (Math.random() - 0.5) * spread,
-            startY + (Math.random() - 0.5) * 0.6,
-            (Math.random() - 0.5) * spread
-          );
-          this.rootGroup.add(p);
-          this.settlingParticles.push({
-            mesh: p,
-            bottomY: bottomY + Math.random() * 0.18,
-            speed: 0.012 + Math.random() * 0.012
-          });
-        }
-      }
-
-      clearScene() {
-        while (this.rootGroup.children.length > 0) {
-          this.rootGroup.remove(this.rootGroup.children[0]);
-        }
-        this.bubbles = [];
-        this.drops = [];
-        this.settlingParticles = [];
-        this.customUpdaters = [];
-        this.dynamicObjects = {};
-        this.labels = [];
-        if (this.labelsLayer) this.labelsLayer.innerHTML = "";
-
-        // High-Contrast Laboratory Bench Surface + Backboard
-        const benchGeo = new THREE.BoxGeometry(12.5, 0.32, 6.2);
-        const benchMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.45, metalness: 0.15 });
-        const bench = new THREE.Mesh(benchGeo, benchMat);
-        bench.position.set(0, -1.38, 0);
-        this.rootGroup.add(bench);
-
-        // Subtle white lab mat on bench so dark and light chemicals contrast sharply
-        const matGeo = new THREE.BoxGeometry(9.6, 0.03, 3.6);
-        const matMesh = new THREE.Mesh(matGeo, new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.6 }));
-        matMesh.position.set(0, -1.21, 0);
-        this.rootGroup.add(matMesh);
-      }
-
-      // ===================== LOAD 11 ACCURATE LESSON EXPERIMENTS =====================
-      loadLesson(lessonId) {
-        this.lessonId = lessonId;
-        this.clearScene();
-        this.setCameraPreset('overview');
-        this.resize();
-
-        // ---------------- BÀI 2: PHẢN ỨNG HÓA HỌC (Fe + S -> FeS) ----------------
-        if (lessonId === 2) {
-          this.createTestTubeRack([-2.2, 1.4]);
-          const t1 = this.createVessel({ x: -2.2, radius: 0.48, height: 2.4, liquidHeight: 0.75, liquidColor: 0xca8a04, liquidOpacity: 0.95, type: 'tube' });
-          const t2 = this.createVessel({ x: 1.4, radius: 0.48, height: 2.4, liquidHeight: 0.75, liquidColor: 0xca8a04, liquidOpacity: 0.95, type: 'tube' });
-
-          // Add visible Iron (Fe) dark grey filings mixed inside both tubes
-          const feFilings1 = new THREE.Group();
-          const feFilings2 = new THREE.Group();
-          const filingGeo = new THREE.DodecahedronGeometry(0.065);
-          const filingMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.85, roughness: 0.3 });
-          for (let i = 0; i < 24; i++) {
-            const m1 = new THREE.Mesh(filingGeo, filingMat);
-            m1.position.set((Math.random() - 0.5) * 0.55, -0.95 + Math.random() * 0.55, (Math.random() - 0.5) * 0.55);
-            feFilings1.add(m1);
-            const m2 = m1.clone();
-            feFilings2.add(m2);
-          }
-          feFilings1.position.x = -2.2;
-          feFilings2.position.x = 1.4;
-          this.rootGroup.add(feFilings1, feFilings2);
-
-          // Alcohol burner under Tube 2
-          const burner = this.createAlcoholBurner(1.4, -1.22, 0.95);
-
-          // 3D Bar Magnet (Red N / Blue S)
-          const magGroup = new THREE.Group();
-          const mRed = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.28, 0.28), new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.3 }));
-          mRed.position.x = -0.325;
-          const mBlue = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.28, 0.28), new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.3 }));
-          mBlue.position.x = 0.325;
-          magGroup.add(mRed, mBlue);
-          magGroup.position.set(-0.4, 1.85, 0);
-          this.rootGroup.add(magGroup);
-
-          this.addPinLabel({ id: 'l_t1', title: 'Ống (1): Hỗn hợp bột Fe + S', sub: 'Chưa đun nóng (Vàng xám)', x: -2.2, y: 1.5, z: 0, borderColor: '#facc15' });
-          this.addPinLabel({ id: 'l_t2', title: 'Ống (2): Hỗn hợp bột Fe + S', sub: 'Đặt trên đèn cồn để nung', x: 1.4, y: 1.5, z: 0, borderColor: '#f97316' });
-          this.addPinLabel({ id: 'l_mag', title: 'Thanh nam châm (N - S)', sub: 'Dùng kiểm tra từ tính của Sắt (Fe)', targetObj: magGroup, offsetY: 0.35, borderColor: '#ef4444' });
-
-          this.dynamicObjects = { t1, t2, feFilings1, feFilings2, burner, magGroup };
-          this.setStatus("🔬 Trạng thái ban đầu: Cả 2 ống nghiệm đều chứa hỗn hợp bột Iron (Fe, xám) và Sulfur (S, vàng) trộn theo tỉ lệ 7:4. Hãy bấm Bước 1!");
-          this.updateTelemetry([
-            { label: "Ống nghiệm (1) - Đối chứng", value: "Hỗn hợp Fe + S", sub: "Trộn vật lí • Chưa đun nóng", color: "text-amber-300" },
-            { label: "Ống nghiệm (2) - Phản ứng", value: "Hỗn hợp Fe + S", sub: "Nhiệt độ hiện tại: 25 °C", color: "text-orange-300" },
-            { label: "Kiểm tra bằng Nam châm", value: "Đang chờ thử", sub: "Fe có tính nhiễm từ, S và FeS không bị hút", color: "text-teal-300" }
-          ]);
-        }
-
-        // ---------------- BÀI 3: MOL & TỈ KHỐI CHẤT KHÍ ----------------
-        else if (lessonId === 3) {
-          // 3 Gas Balloons with strings + 3 Molar Volume Cylinders at bottom
-          const createBalloon = (x, color, r = 0.65) => {
-            const g = new THREE.Group();
-            g.position.set(x, 0.25, 0);
-            const sphere = new THREE.Mesh(
-              new THREE.SphereGeometry(r, 28, 28),
-              new THREE.MeshPhysicalMaterial({ color, roughness: 0.2, clearcoat: 0.6, transparent: true, opacity: 0.9 })
-            );
-            const knot = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.18, 12), new THREE.MeshStandardMaterial({ color }));
-            knot.position.y = -r - 0.05;
-            const string = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.9, 8), new THREE.MeshBasicMaterial({ color: 0xe2e8f0 }));
-            string.position.y = -r - 0.5;
-            g.add(sphere, knot, string);
-            this.rootGroup.add(g);
-            return g;
-          };
-
-          const bCH4 = createBalloon(-2.7, 0x38bdf8, 0.65);
-          const bAir = createBalloon(0, 0x22c55e, 0.65);
-          const bCO2 = createBalloon(2.7, 0xf97316, 0.65);
-
-          this.addPinLabel({ id: 'b_ch4', title: 'Bóng khí CH₄ (M = 16 g/mol)', sub: 'd(CH₄/kk) = 16/29 ≈ 0,55 (< 1)', targetObj: bCH4, offsetY: 0.85, borderColor: '#38bdf8' });
-          this.addPinLabel({ id: 'b_air', title: 'Bóng Không khí (M ≈ 29 g/mol)', sub: 'd = 1,00 (Mức đối chứng)', targetObj: bAir, offsetY: 0.85, borderColor: '#22c55e' });
-          this.addPinLabel({ id: 'b_co2', title: 'Bóng khí CO₂ (M = 44 g/mol)', sub: 'd(CO₂/kk) = 44/29 ≈ 1,52 (> 1)', targetObj: bCO2, offsetY: 0.85, borderColor: '#f97316' });
-
-          this.dynamicObjects = { bCH4, bAir, bCO2 };
-          this.setStatus("🔬 Sẵn sàng: 3 quả cầu chứa cùng 1 mol khí ở ĐKC (25°C, 1 bar) đều có thể tích 24,79 L nhưng khối lượng mol khác nhau. Bấm Bước 1 để thả tự do!");
-          this.updateTelemetry([
-            { label: "Khí Methane (CH₄)", value: "M = 16 g/mol • d ≈ 0,55", sub: "Nhẹ hơn không khí → Bay lên cao", color: "text-sky-300" },
-            { label: "Không khí đối chứng", value: "M ≈ 29 g/mol • d = 1,00", sub: "1 mol khí (25°C, 1 bar) = 24,79 Lít", color: "text-emerald-300" },
-            { label: "Khí Carbon dioxide (CO₂)", value: "M = 44 g/mol • d ≈ 1,52", sub: "Nặng hơn không khí → Chìm xuống đáy", color: "text-orange-300" }
-          ]);
-        }
-
-        // ---------------- BÀI 4: DUNG DỊCH & NỒNG ĐỘ (Hình 4.1 SGK) ----------------
-        else if (lessonId === 4) {
-          const c1 = this.createVessel({ x: -3.45, radius: 0.62, height: 2.15, liquidHeight: 1.3, liquidColor: 0xe0f2fe, liquidOpacity: 0.42, type: 'beaker' });
-          const c2 = this.createVessel({ x: -1.15, radius: 0.62, height: 2.15, liquidHeight: 1.3, liquidColor: 0xe0f2fe, liquidOpacity: 0.42, type: 'beaker' });
-          const c3 = this.createVessel({ x: 1.15, radius: 0.62, height: 2.15, liquidHeight: 1.3, liquidColor: 0xe0f2fe, liquidOpacity: 0.42, type: 'beaker' });
-          const c4 = this.createVessel({ x: 3.45, radius: 0.62, height: 2.15, liquidHeight: 1.3, liquidColor: 0xe0f2fe, liquidOpacity: 0.42, type: 'beaker' });
-
-          // Glass stirring rods inside each beaker
-          const createRod = (x) => {
-            const rod = new THREE.Mesh(
-              new THREE.CylinderGeometry(0.03, 0.03, 2.5, 12),
-              new THREE.MeshPhysicalMaterial({ color: 0xffffff, transparent: true, opacity: 0.75 })
-            );
-            rod.position.set(x + 0.18, 0.1, 0);
-            rod.rotation.z = -0.15;
-            this.rootGroup.add(rod);
-            return rod;
-          };
-          const r1 = createRod(-3.45), r2 = createRod(-1.15), r3 = createRod(1.15), r4 = createRod(3.45);
-          const burner4 = this.createAlcoholBurner(3.45, -1.22, 0.9);
-          burner4.burnerGroup.visible = false;
-
-          this.addPinLabel({ id: 'c1', title: 'Cốc (1): 20 mL Nước', sub: '+ 1 thìa muối ăn NaCl', x: -3.45, y: 1.35, z: 0, borderColor: '#38bdf8' });
-          this.addPinLabel({ id: 'c2', title: 'Cốc (2): 20 mL Nước', sub: '+ 1 thìa CuSO₄ xanh', x: -1.15, y: 1.35, z: 0, borderColor: '#0284c7' });
-          this.addPinLabel({ id: 'c3', title: 'Cốc (3): 20 mL Nước', sub: '+ 1 thìa sữa bột', x: 1.15, y: 1.35, z: 0, borderColor: '#facc15' });
-          this.addPinLabel({ id: 'c4', title: 'Cốc (4): 20 mL Nước', sub: '+ 4 thìa muối ăn NaCl', x: 3.45, y: 1.35, z: 0, borderColor: '#f43f5e' });
-
-          this.dynamicObjects = { c1, c2, c3, c4, r1, r2, r3, r4, burner4 };
-          this.setStatus("🔬 Sẵn sàng 4 cốc nước 20 mL (Hình 4.1 SGK). Hãy bấm Bước 1 để cho các chất rắn vào 4 cốc!");
-          this.updateTelemetry([
-            { label: "Cốc (1) & Cốc (2)", value: "Dung dịch đồng nhất", sub: "Chất tan phân bố đều, trong suốt", color: "text-sky-300" },
-            { label: "Cốc (3) - Sữa bột", value: "Hỗn dịch đục trắng", sub: "Không tan → KHÔNG phải dung dịch", color: "text-amber-300" },
-            { label: "Cốc (4) - 4 thìa NaCl", value: "Dung dịch bão hòa", sub: "Còn muối rắn không tan ở 25 °C", color: "text-rose-300" }
-          ]);
-        }
-
-        // ---------------- BÀI 5: ĐỊNH LUẬT BẢO TOÀN KHỐI LƯỢNG (Hình 5.1 SGK) ----------------
-        else if (lessonId === 5) {
-          const scale = this.createDigitalScale(0, -1.22, 0, "35.00 g");
-          const c1 = this.createVessel({ x: -1.25, y: -0.72, radius: 0.62, height: 1.95, liquidHeight: 1.05, liquidColor: 0xe0f2fe, liquidOpacity: 0.5, type: 'beaker' });
-          const c2 = this.createVessel({ x: 1.25, y: -0.72, radius: 0.62, height: 1.95, liquidHeight: 1.05, liquidColor: 0xe0f2fe, liquidOpacity: 0.5, type: 'beaker' });
-
-          // Pouring liquid stream (hidden initially)
-          const stream = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.06, 0.09, 1.45, 16),
-            new THREE.MeshStandardMaterial({ color: 0xe0f2fe, transparent: true, opacity: 0.85 })
-          );
-          stream.position.set(0.75, 0.5, 0);
-          stream.visible = false;
-          this.rootGroup.add(stream);
-
-          this.addPinLabel({ id: 'b5_c1', title: 'Cốc (1): dd BaCl₂', sub: 'Khối lượng: 20,80 g', targetObj: c1.group, offsetY: 2.15, borderColor: '#38bdf8' });
-          this.addPinLabel({ id: 'b5_c2', title: 'Cốc (2): dd Na₂SO₄', sub: 'Khối lượng: 14,20 g', targetObj: c2.group, offsetY: 2.15, borderColor: '#38bdf8' });
-          this.addPinLabel({ id: 'b5_scale', title: 'Màn hình Cân điện tử: 35,00 g', sub: 'Tổng khối lượng trên đĩa cân', x: 0, y: -0.35, z: 1.5, borderColor: '#10b981' });
-
-          this.dynamicObjects = { scale, c1, c2, stream };
-          this.setStatus("⚖️ Cân điện tử 3D (Hình 5.1 SGK): Cốc (1) chứa 20,80 g BaCl₂ + Cốc (2) chứa 14,20 g Na₂SO₄. Tổng khối lượng ban đầu = 35,00 g.");
-          this.updateTelemetry([
-            { label: "Tổng khối lượng TRƯỚC PƯ", value: "m₁ = 35,00 gam", sub: "20,80 g BaCl₂ + 14,20 g Na₂SO₄", color: "text-sky-300" },
-            { label: "Hiện tượng phản ứng", value: "Tạo kết tủa trắng BaSO₄↓", sub: "BaCl₂ + Na₂SO₄ → BaSO₄↓ + 2NaCl", color: "text-amber-300" },
-            { label: "Tổng khối lượng SAU PƯ", value: "m₂ = 35,00 gam (Bảo toàn)", sub: "23,30 g BaSO₄↓ + 11,70 g NaCl", color: "text-emerald-300" }
-          ]);
-        }
-
-        // ---------------- BÀI 6: TÍNH THEO PTHH & HIỆU SUẤT (Fe2O3 + 3H2 -> 2Fe + 3H2O) ----------------
-        else if (lessonId === 6) {
-          // Horizontal quartz reduction tube on stand
-          const standL = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 2.4, 12), new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.7 }));
-          standL.position.set(-2.3, 0.0, 0);
-          const standR = standL.clone();
-          standR.position.set(2.3, 0.0, 0);
-          this.rootGroup.add(standL, standR);
-
-          const tube = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.48, 0.48, 5.6, 32, 1, true),
-            new THREE.MeshPhysicalMaterial({ color: 0xf8fafc, transparent: true, opacity: 0.35, side: THREE.DoubleSide })
-          );
-          tube.rotation.z = Math.PI / 2;
-          tube.position.set(0, 0.35, 0);
-          this.rootGroup.add(tube);
-
-          // Porcelain boat holding 8.0 g of reddish-brown Fe2O3 powder
-          const boat = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.14, 0.56), new THREE.MeshStandardMaterial({ color: 0xf8fafc }));
-          boat.position.set(0, 0.02, 0);
-          const solidFe2O3 = new THREE.Mesh(
-            new THREE.BoxGeometry(1.9, 0.28, 0.48),
-            new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.85 })
-          );
-          solidFe2O3.position.set(0, 0.2, 0);
-          this.rootGroup.add(boat, solidFe2O3);
-
-          // Water droplets condensed on right side of tube (hidden initially)
-          const waterDrops = new THREE.Group();
-          for (let i = 0; i < 14; i++) {
-            const wd = new THREE.Mesh(new THREE.SphereGeometry(0.055, 10, 10), new THREE.MeshStandardMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.85 }));
-            wd.position.set(1.4 + Math.random() * 1.1, 0.15 + (Math.random() - 0.5) * 0.45, (Math.random() - 0.5) * 0.45);
-            waterDrops.add(wd);
-          }
-          waterDrops.visible = false;
-          this.rootGroup.add(waterDrops);
-
-          const burner = this.createAlcoholBurner(0, -1.22, 0);
-
-          this.addPinLabel({ id: 'b6_h2', title: 'Đầu vào khí H₂ dư →', sub: 'Dẫn qua ống sứ chịu nhiệt', x: -2.7, y: 0.85, z: 0, borderColor: '#38bdf8' });
-          this.addPinLabel({ id: 'b6_solid', title: 'Thuyền sứ: 8,0 g bột Fe₂O₃ (0,05 mol)', sub: 'Màu đỏ nâu (Chưa phản ứng)', x: 0, y: 1.05, z: 0, borderColor: '#ef4444' });
-          this.addPinLabel({ id: 'b6_h2o', title: 'Đầu ra hơi nước H₂O↑', sub: 'Chưa có nước ngưng tụ', x: 2.5, y: 0.85, z: 0, borderColor: '#64748b' });
-
-          this.dynamicObjects = { tube, solidFe2O3, waterDrops, burner };
-          this.setStatus("🔬 Ống sứ chứa 8,0 g (0,05 mol) bột Iron(III) oxide (Fe₂O₃) màu đỏ nâu. Bấm Bước 1 để dẫn khí H₂ và Bước 2 để nung nóng!");
-          this.updateTelemetry([
-            { label: "Chất tham gia (Fe₂O₃)", value: "m = 8,0 g (n = 0,05 mol)", sub: "Bột màu đỏ nâu trong thuyền sứ", color: "text-rose-300" },
-            { label: "Sản phẩm lí thuyết (Fe)", value: "n(Fe) = 0,10 mol → 5,6 g", sub: "Theo PTHH: Fe₂O₃ + 3H₂ → 2Fe + 3H₂O", color: "text-sky-300" },
-            { label: "Sản phẩm thực tế & H%", value: "m(thực tế) = 4,2 g → H = 75%", sub: "H = (4,2 / 5,6) × 100% = 75%", color: "text-emerald-300" }
-          ]);
-        }
-
-        // ---------------- BÀI 7: TỐC ĐỘ PHẢN ỨNG & CHẤT XÚC TÁC (Hình 7.3, 7.4, 7.5 SGK) ----------------
-        else if (lessonId === 7) {
-          this.createTestTubeRack([-1.8, 1.8]);
-          const leftV = this.createVessel({ x: -1.8, radius: 0.58, height: 2.5, liquidHeight: 1.45, liquidColor: 0xbae6fd, liquidOpacity: 0.52, type: 'tube' });
-          const rightV = this.createVessel({ x: 1.8, radius: 0.58, height: 2.5, liquidHeight: 1.45, liquidColor: 0xbae6fd, liquidOpacity: 0.52, type: 'tube' });
-
-          // Solid reactant pieces at bottom of both tubes
-          leftV.pptMesh.visible = true;
-          leftV.pptMat.color.setHex(0x94a3b8);
-          rightV.pptMesh.visible = true;
-          rightV.pptMat.color.setHex(0x94a3b8);
-
-          this.addPinLabel({ id: 'b7_left', title: 'Ống A (Đối chứng)', sub: 'Tốc độ phản ứng chuẩn', x: -1.8, y: 1.55, z: 0, borderColor: '#38bdf8' });
-          this.addPinLabel({ id: 'b7_right', title: 'Ống B (Tăng yếu tố tác động)', sub: 'Nồng độ / Nhiệt độ / Bề mặt / Xúc tác', x: 1.8, y: 1.55, z: 0, borderColor: '#f97316' });
-
-          this.dynamicObjects = { leftV, rightV };
-          this.setStatus("🔬 Hai ống nghiệm đối chứng A (Trái) và B (Phải). Hãy bấm chọn từng yếu tố bên phải để so sánh trực tiếp tốc độ thoát bọt khí!");
-          this.updateTelemetry([
-            { label: "Ống nghiệm A (Trái)", value: "Điều kiện đối chứng", sub: "HCl 0,1M / Nước lạnh / Đá viên / Không xúc tác", color: "text-sky-300" },
-            { label: "Ống nghiệm B (Phải)", value: "Tăng tốc độ phản ứng", sub: "HCl 1M / Nước nóng / Đá bột / Xúc tác MnO₂", color: "text-amber-300" },
-            { label: "So sánh trực quan", value: "Ống B sủi bọt nhanh gấp 5–10 lần", sub: "Quan sát mật độ và vận tốc bọt khí thoát ra", color: "text-emerald-300" }
-          ]);
-        }
-
-        // ---------------- BÀI 8: ACID (Quỳ tím + Zn, Fe, Cu + HCl) ----------------
-        else if (lessonId === 8) {
-          // Litmus paper strip on left + 3 test tubes (Zn, Fe, Cu) in rack
-          const litmus = new THREE.Mesh(new THREE.BoxGeometry(0.55, 1.35, 0.06), new THREE.MeshStandardMaterial({ color: 0x8b5cf6, roughness: 0.5 }));
-          litmus.position.set(-3.4, 0.25, 0);
-          this.rootGroup.add(litmus);
-          const dropperLit = this.createDropper(-3.4, 1.65, 0, 0xef4444);
-
-          this.createTestTubeRack([-1.1, 1.0, 3.1]);
-          const tZn = this.createVessel({ x: -1.1, radius: 0.48, height: 2.35, liquidHeight: 1.35, liquidColor: 0xe0f2fe, liquidOpacity: 0.48, type: 'tube' });
-          const tFe = this.createVessel({ x: 1.0, radius: 0.48, height: 2.35, liquidHeight: 1.35, liquidColor: 0xe0f2fe, liquidOpacity: 0.48, type: 'tube' });
-          const tCu = this.createVessel({ x: 3.1, radius: 0.48, height: 2.35, liquidHeight: 1.35, liquidColor: 0xe0f2fe, liquidOpacity: 0.48, type: 'tube' });
-
-          // Metals: Zinc pellet, Iron nail, Copper plate
-          const znPellet = new THREE.Mesh(new THREE.SphereGeometry(0.24, 20, 20), new THREE.MeshStandardMaterial({ color: 0xcbd5e1, metalness: 0.85, roughness: 0.2 }));
-          znPellet.position.set(-1.1, 1.55, 0);
-          const feNail = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 1.15, 16), new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.85, roughness: 0.25 }));
-          feNail.position.set(1.0, 1.55, 0);
-          const cuPlate = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.9, 0.08), new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.8, roughness: 0.25 }));
-          cuPlate.position.set(3.1, 1.55, 0);
-          this.rootGroup.add(znPellet, feNail, cuPlate);
-
-          this.addPinLabel({ id: 'b8_lit', title: 'Giấy quỳ tím', sub: 'Màu tím ban đầu', x: -3.4, y: 1.15, z: 0, borderColor: '#a855f7' });
-          this.addPinLabel({ id: 'b8_zn', title: 'Ống (1): dd HCl + Kẽm (Zn)', sub: 'Viên Zn trắng bạc', x: -1.1, y: 1.5, z: 0, borderColor: '#38bdf8' });
-          this.addPinLabel({ id: 'b8_fe', title: 'Ống (2): dd HCl + Sắt (Fe)', sub: 'Đinh sắt xám', x: 1.0, y: 1.5, z: 0, borderColor: '#38bdf8' });
-          this.addPinLabel({ id: 'b8_cu', title: 'Ống (3): dd HCl + Đồng (Cu)', sub: 'Lá đồng đỏ (Đối chứng)', x: 3.1, y: 1.5, z: 0, borderColor: '#f97316' });
-
-          this.dynamicObjects = { litmus, dropperLit, tZn, tFe, tCu, znPellet, feNail, cuPlate };
-          this.setStatus("🔬 Khay thí nghiệm Bài 8 (Acid): Giấy quỳ tím bên trái và 3 ống nghiệm chứa dung dịch HCl loãng với 3 kim loại Zn, Fe, Cu.");
-          this.updateTelemetry([
-            { label: "Giấy quỳ tím + HCl", value: "Quỳ tím hóa ĐỎ", sub: "Dấu hiệu nhận biết dung dịch Acid (H⁺)", color: "text-rose-300" },
-            { label: "Ống (1) Zn & Ống (2) Fe", value: "Sủi bọt khí H₂↑ mạnh", sub: "Zn + 2HCl → ZnCl₂ + H₂↑ ; Fe → FeCl₂ lục nhạt", color: "text-emerald-300" },
-            { label: "Ống (3) Đồng (Cu) + HCl", value: "KHÔNG phản ứng", sub: "Kim loại Cu không tan trong dung dịch HCl", color: "text-amber-300" }
-          ]);
-        }
-
-        // ---------------- BÀI 9: BASE & THANG pH (Hình 9.1 SGK: Trung hòa + Cu(OH)2) ----------------
-        else if (lessonId === 9) {
-          // Left: Litmus paper in NaOH; Center: Neutralization Beaker NaOH + Phenolphthalein + HCl; Right: CuSO4 + NaOH -> Cu(OH)2
-          const litmus = new THREE.Mesh(new THREE.BoxGeometry(0.52, 1.3, 0.06), new THREE.MeshStandardMaterial({ color: 0x8b5cf6 }));
-          litmus.position.set(-3.1, 0.2, 0);
-          this.rootGroup.add(litmus);
-
-          const mainVessel = this.createVessel({ x: 0, radius: 0.78, height: 2.35, liquidHeight: 1.25, liquidColor: 0xf8fafc, liquidOpacity: 0.45, type: 'beaker' });
-          const dropper = this.createDropper(0, 1.85, 0, 0xec4899);
-
-          const cuVessel = this.createVessel({ x: 3.0, radius: 0.55, height: 2.35, liquidHeight: 1.3, liquidColor: 0x0284c7, liquidOpacity: 0.72, type: 'tube' });
-          this.createTestTubeRack([3.0]);
-
-          this.addPinLabel({ id: 'b9_lit', title: 'Giấy quỳ tím + NaOH', sub: 'Kiểm tra chỉ thị màu Base', x: -3.1, y: 1.15, z: 0, borderColor: '#38bdf8' });
-          this.addPinLabel({ id: 'b9_main', title: 'Cốc trung tâm: 2 mL dd NaOH', sub: 'Trong suốt không màu (pH = 13,0)', x: 0, y: 1.45, z: 0, borderColor: '#ec4899' });
-          this.addPinLabel({ id: 'b9_cu', title: 'Ống nghiệm: dd CuSO₄', sub: 'Nhỏ NaOH điều chế Cu(OH)₂↓', x: 3.0, y: 1.45, z: 0, borderColor: '#0284c7' });
-
-          this.dynamicObjects = { litmus, mainVessel, dropper, cuVessel };
-          this.setStatus("🔬 Thí nghiệm Bài 9 (Base & pH): Cốc giữa chứa dung dịch kiềm NaOH (pH = 13). Bấm Bước 1 để thử chất chỉ thị màu!");
-          this.updateTelemetry([
-            { label: "Chỉ thị màu với Kiềm (NaOH)", value: "Quỳ → XANH • Phenol → HỒNG", sub: "Môi trường kiềm có pH > 7 (pH = 13,0)", color: "text-pink-300" },
-            { label: "Phản ứng trung hòa (Hình 9.1)", value: "NaOH + HCl → NaCl + H₂O", sub: "Dung dịch mất màu hồng, về trung tính pH = 7,0", color: "text-emerald-300" },
-            { label: "Base không tan Cu(OH)₂", value: "Kết tủa keo XANH LAM", sub: "CuSO₄ + 2NaOH → Cu(OH)₂↓ + Na₂SO₄", color: "text-sky-300" }
-          ]);
-        }
-
-        // ---------------- BÀI 10: OXIDE (CO2 + Ca(OH)2 ; CuO + H2SO4 ; Fe2O3 + HCl) ----------------
-        else if (lessonId === 10) {
-          this.createTestTubeRack([-3.1, -0.5, 1.6, 3.4]);
-          const t1 = this.createVessel({ x: -3.1, radius: 0.46, height: 2.3, liquidHeight: 1.15, liquidColor: 0xe0f2fe, liquidOpacity: 0.5, type: 'tube' });
-          t1.pptMesh.visible = true;
-          t1.pptMat.color.setHex(0xf8fafc); // Đá vôi CaCO3 trắng ở đáy ống 1
-
-          const t2 = this.createVessel({ x: -0.5, radius: 0.46, height: 2.3, liquidHeight: 1.25, liquidColor: 0xf8fafc, liquidOpacity: 0.38, type: 'tube' });
-
-          // Rubber stopper on Tube 1 + Full 3-segment L-shaped glass delivery tube dipping into Tube 2
-          const stopper = new THREE.Mesh(new THREE.CylinderGeometry(0.49, 0.43, 0.28, 20), new THREE.MeshStandardMaterial({ color: 0xdc2626 }));
-          stopper.position.set(-3.1, 1.1, 0);
-          this.rootGroup.add(stopper);
-
-          const pipeMat = new THREE.MeshPhysicalMaterial({ color: 0xe2e8f0, transparent: true, opacity: 0.75, roughness: 0.1 });
-          const pUp = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.55, 12), pipeMat);
-          pUp.position.set(-3.1, 1.45, 0);
-          const pHoriz = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 2.6, 12), pipeMat);
-          pHoriz.rotation.z = Math.PI / 2;
-          pHoriz.position.set(-1.8, 1.72, 0);
-          const pDown = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 2.15, 12), pipeMat);
-          pDown.position.set(-0.5, 0.65, 0);
-          this.rootGroup.add(pUp, pHoriz, pDown);
-
-          // Tube 3: Black CuO powder + H2SO4
-          const t3 = this.createVessel({ x: 1.6, radius: 0.46, height: 2.3, liquidHeight: 1.25, liquidColor: 0xe0f2fe, liquidOpacity: 0.45, type: 'tube' });
-          t3.pptMesh.visible = true;
-          t3.pptMat.color.setHex(0x0f172a); // Bột CuO màu đen
-
-          // Tube 4: Reddish-brown Fe2O3 (rust) + HCl
-          const t4 = this.createVessel({ x: 3.4, radius: 0.46, height: 2.3, liquidHeight: 1.25, liquidColor: 0xe0f2fe, liquidOpacity: 0.45, type: 'tube' });
-          t4.pptMesh.visible = true;
-          t4.pptMat.color.setHex(0x991b1b); // Bột Fe2O3 đỏ nâu
-
-          this.addPinLabel({ id: 'b10_t1', title: 'Ống (1): CaCO₃ + HCl', sub: 'Sinh khí CO₂↑ qua ống chữ L', x: -3.1, y: 1.85, z: 0, borderColor: '#38bdf8' });
-          this.addPinLabel({ id: 'b10_t2', title: 'Ống (2): Nước vôi trong Ca(OH)₂', sub: 'Trong suốt (Chờ sục khí CO₂)', x: -0.5, y: 1.45, z: 0, borderColor: '#22c55e' });
-          this.addPinLabel({ id: 'b10_t3', title: 'Ống (3): Bột CuO đen + H₂SO₄', sub: 'Oxide base màu đen ở đáy', x: 1.6, y: 1.45, z: 0, borderColor: '#0284c7' });
-          this.addPinLabel({ id: 'b10_t4', title: 'Ống (4): Gỉ sắt Fe₂O₃ + HCl', sub: 'Oxide base màu đỏ nâu', x: 3.4, y: 1.45, z: 0, borderColor: '#f59e0b' });
-
-          this.dynamicObjects = { t1, t2, t3, t4 };
-          this.setStatus("🔬 Hệ thống 4 ống nghiệm Bài 10 (Oxide): (1)-(2) Điều chế và thử tính chất Oxide acid CO₂; (3) CuO + H₂SO₄; (4) Fe₂O₃ + HCl.");
-          this.updateTelemetry([
-            { label: "Ống (1) → (2): Oxide acid CO₂", value: "Nước vôi trong VẨN ĐỤC TRẮNG", sub: "CO₂ + Ca(OH)₂ → CaCO₃↓ (trắng) + H₂O", color: "text-teal-300" },
-            { label: "Ống (3): CuO đen + H₂SO₄", value: "Tạo dd CuSO₄ XANH LAM", sub: "CuO (đen) + H₂SO₄ → CuSO₄ (xanh lam) + H₂O", color: "text-sky-300" },
-            { label: "Ống (4): Fe₂O₃ đỏ nâu + HCl", value: "Tạo dd FeCl₃ VÀNG NÂU", sub: "Fe₂O₃ + 6HCl → 2FeCl₃ (vàng nâu) + 3H₂O", color: "text-amber-300" }
-          ]);
-        }
-
-        // ---------------- BÀI 11: MUỐI (Hình 11.1 SGK trang 45: 4 ống nghiệm) ----------------
-        else if (lessonId === 11) {
-          this.createTestTubeRack([-3.3, -1.1, 1.1, 3.3]);
-          const u1 = this.createVessel({ x: -3.3, radius: 0.48, height: 2.35, liquidHeight: 1.35, liquidColor: 0x0284c7, liquidOpacity: 0.76, type: 'tube' });
-          // Iron nail inside Tube 1 with lower part ready to be coated with red Cu
-          const nailGroup = new THREE.Group();
-          const nailTop = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.85, 16), new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85 }));
-          nailTop.position.y = 0.42;
-          const nailBottom = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.085, 0.95, 16), new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85 }));
-          nailBottom.position.y = -0.45;
-          nailGroup.add(nailTop, nailBottom);
-          nailGroup.position.set(-3.3, 0.05, 0);
-          this.rootGroup.add(nailGroup);
-
-          const u2 = this.createVessel({ x: -1.1, radius: 0.48, height: 2.35, liquidHeight: 1.35, liquidColor: 0xe0f2fe, liquidOpacity: 0.42, type: 'tube' });
-          const u3 = this.createVessel({ x: 1.1, radius: 0.48, height: 2.35, liquidHeight: 1.35, liquidColor: 0xe0f2fe, liquidOpacity: 0.42, type: 'tube' });
-          const u4 = this.createVessel({ x: 3.3, radius: 0.48, height: 2.35, liquidHeight: 1.35, liquidColor: 0x0284c7, liquidOpacity: 0.76, type: 'tube' });
-
-          const d2 = this.createDropper(-1.1, 1.75, 0, 0x38bdf8);
-          const d3 = this.createDropper(1.1, 1.75, 0, 0x38bdf8);
-          const d4 = this.createDropper(3.3, 1.75, 0, 0xec4899);
-
-          this.addPinLabel({ id: 'b11_1', title: 'Ống (1): Đinh Fe + dd CuSO₄', sub: 'Dung dịch xanh lam, đinh sắt xám', x: -3.3, y: 1.45, z: 0, borderColor: '#f97316' });
-          this.addPinLabel({ id: 'b11_2', title: 'Ống (2): dd H₂SO₄ + BaCl₂', sub: 'Muối + Acid (Hình 11.1b)', x: -1.1, y: 1.45, z: 0, borderColor: '#38bdf8' });
-          this.addPinLabel({ id: 'b11_3', title: 'Ống (3): dd Na₂SO₄ + BaCl₂', sub: 'Muối + Muối (Hình 11.1c)', x: 1.1, y: 1.45, z: 0, borderColor: '#38bdf8' });
-          this.addPinLabel({ id: 'b11_4', title: 'Ống (4): dd CuSO₄ + NaOH', sub: 'Muối + Base (Hình 11.1d)', x: 3.3, y: 1.45, z: 0, borderColor: '#0284c7' });
-
-          this.dynamicObjects = { u1, nailGroup, nailBottom, u2, u3, u4, d2, d3, d4 };
-          this.setStatus("🔬 Giá 4 ống nghiệm chuẩn Hình 11.1 SGK trang 45: Kiểm chứng đủ 4 tính chất hóa học của Muối. Bấm từng bước bên phải!");
-          this.updateTelemetry([
-            { label: "Ống (1): Fe + CuSO₄", value: "Cu ĐỎ bám lên đinh sắt", sub: "Màu xanh lam của dung dịch CuSO₄ nhạt dần", color: "text-orange-300" },
-            { label: "Ống (2) & (3): + dd BaCl₂", value: "Kết tủa TRẮNG BaSO₄↓", sub: "Không tan trong nước và acid", color: "text-slate-100" },
-            { label: "Ống (4): CuSO₄ + NaOH", value: "Kết tủa XANH LAM Cu(OH)₂↓", sub: "Phản ứng trao đổi tạo chất kết tủa", color: "text-sky-300" }
-          ]);
-        }
-
-        // ---------------- BÀI 12: PHÂN BÓN HÓA HỌC (N-P-K, Độ tan & Thùng ủ 5L) ----------------
-        else if (lessonId === 12) {
-          // Cross-section transparent pot showing roots + stem + leaves + flowers/fruits
-          const pot = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.95, 0.72, 1.15, 28),
-            new THREE.MeshPhysicalMaterial({ color: 0x92400e, transparent: true, opacity: 0.72, roughness: 0.6 })
-          );
-          pot.position.set(-1.9, -0.64, 0);
-
-          // Root branches visible inside soil
-          const rootsGroup = new THREE.Group();
-          rootsGroup.position.set(-1.9, -0.45, 0);
-          for (let i = 0; i < 6; i++) {
-            const r = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.01, 0.55, 8), new THREE.MeshStandardMaterial({ color: 0xfde047 }));
-            r.rotation.z = (i - 2.5) * 0.35;
-            r.position.set((i - 2.5) * 0.12, -0.25, 0.15);
-            rootsGroup.add(r);
-          }
-
-          const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.15, 1.35, 16), new THREE.MeshStandardMaterial({ color: 0x15803d }));
-          stem.position.set(-1.9, 0.45, 0);
-          const crown = new THREE.Mesh(new THREE.SphereGeometry(0.75, 24, 24), new THREE.MeshStandardMaterial({ color: 0x22c55e, roughness: 0.5 }));
-          crown.position.set(-1.9, 1.3, 0);
-
-          const flowersGroup = new THREE.Group();
-          const f1 = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), new THREE.MeshStandardMaterial({ color: 0xf43f5e }));
-          f1.position.set(-1.35, 1.65, 0.35);
-          const f2 = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), new THREE.MeshStandardMaterial({ color: 0xfacc15 }));
-          f2.position.set(-2.35, 1.55, 0.35);
-          flowersGroup.add(f1, f2);
-          flowersGroup.visible = false;
-
-          // Compost Bin 5L (Hình 12.3 SGK) on right
-          const bin = this.createVessel({ x: 2.0, radius: 0.88, height: 2.25, liquidHeight: 1.35, liquidColor: 0x4ade80, liquidOpacity: 0.88, type: 'beaker' });
-
-          this.rootGroup.add(pot, rootsGroup, stem, crown, flowersGroup);
-
-          this.addPinLabel({ id: 'b12_plant', title: 'Cây trồng thử nghiệm N - P - K', sub: 'Quan sát Thân, Lá, Hoa, Quả & Bộ rễ', x: -1.9, y: 2.35, z: 0, borderColor: '#22c55e' });
-          this.addPinLabel({ id: 'b12_roots', title: 'Bộ rễ dưới đất', sub: 'Phát triển mạnh khi bón Lân (P)', x: -1.9, y: -0.95, z: 0.8, borderColor: '#facc15' });
-          this.addPinLabel({ id: 'b12_bin', title: 'Thùng nhựa 5 Lít ủ phân hữu cơ', sub: '3 kg rác thực vật + 6 g vi sinh Trichoderma', x: 2.0, y: 1.45, z: 0, borderColor: '#10b981' });
-
-          this.dynamicObjects = { pot, rootsGroup, stem, crown, flowersGroup, bin };
-          this.setStatus("🔬 Mô hình Bài 12 (Phân bón hóa học): Trái = Chậu cây mặt cắt hiển thị cả bộ rễ, thân, lá; Phải = Thùng 5 Lít ủ phân hữu cơ (Hình 12.3 SGK).");
-          this.updateTelemetry([
-            { label: "Đạm (N) - NaNO₃, Urea", value: "Phát triển Thân & Lá xanh", sub: "Tất cả các loại phân đạm đều dễ tan trong nước", color: "text-emerald-300" },
-            { label: "Lân (P) - Ca₃(PO₄)₂, Super lân", value: "Kích thích Rễ, Hoa & Quả", sub: "Lân nung chảy không tan trong nước, hợp đất chua", color: "text-pink-300" },
-            { label: "Kali (K) & Phân hữu cơ", value: "Cứng cây, chịu lạnh & An toàn", sub: "Bón phân theo quy tắc '4 đúng' (Liều-Loại-Lúc-Nơi)", color: "text-amber-300" }
-          ]);
-        }
-      }
-
-      // ===================== TRIGGER STEP-BY-STEP ACCURATE ACTIONS =====================
-      triggerAction(actionId) {
-        const d = this.dynamicObjects;
-        this.bubbles.forEach(b => this.rootGroup.remove(b.mesh));
-        this.bubbles = [];
-        this.settlingParticles.forEach(p => this.rootGroup.remove(p.mesh));
-        this.settlingParticles = [];
-        this.customUpdaters = [];
-
-        // ---------------- BÀI 2 ----------------
-        if (actionId === 'magnet_before') {
-          d.burner.flameGroup.visible = false;
-          d.magGroup.position.set(-2.2, 0.55, 0);
-          // Animate iron filings rising up to stick to the magnet in Tube 1!
-          d.feFilings1.children.forEach((m, idx) => {
-            m.position.y = 0.15 + (idx % 5) * 0.06;
-          });
-          this.updatePinLabel('l_t1', 'Ống (1): Sắt (Fe) bị hút lên nam châm!', 'Bột Lưu huỳnh (S) màu vàng ở lại đáy ống', '#ef4444');
-          this.setStatus("🧲 Bước 1 (Trước khi đun): Khi đưa nam châm lại gần Ống (1), các hạt bột Sắt (Fe) màu xám bị hút tách khỏi bột Lưu huỳnh (S) màu vàng → Hỗn hợp trộn vật lí, mỗi chất vẫn giữ nguyên tính chất!");
-        } else if (actionId === 'heat_fe_s') {
-          d.magGroup.position.set(-0.4, 1.85, 0);
-          d.burner.flameGroup.visible = true;
-          // Glow red-orange exothermic reaction then turn dark grey-black FeS
-          d.t2.setLiquidColor(0xea580c, 0.98);
-          setTimeout(() => {
-            if (d.t2) d.t2.setLiquidColor(0x1e293b, 0.98);
-          }, 900);
-          this.spawnBubbles(1.4, 14, 0.025, 0xf97316, -0.9, 0.0, 0.35);
-          this.updatePinLabel('l_t2', 'Ống (2): Đang nung nóng (450 °C)', 'Hỗn hợp nóng đỏ → Tạo chất rắn FeS màu xám đen!', '#f97316');
-          this.setStatus("🔥 Bước 2 (Đun nóng đáy ống 2): Hỗn hợp Fe + S nóng đỏ rực lên (phản ứng tỏa nhiệt) và biến đổi hóa học tạo thành hợp chất mới Iron(II) sulfide (FeS) màu xám đen!");
-        } else if (actionId === 'magnet_after') {
-          d.burner.flameGroup.visible = false;
-          d.magGroup.position.set(1.4, 0.55, 0);
-          d.t2.setLiquidColor(0x0f172a, 0.98);
-          // Filings stay fused at the bottom of Tube 2
-          d.feFilings2.children.forEach(m => { m.position.y = -0.85; });
-          this.updatePinLabel('l_t2', 'Ống (2): Chất mới FeS (Xám đen)', 'Nam châm KHÔNG hút được nữa → Biến đổi hóa học!', '#10b981');
-          this.setStatus("✅ Bước 3 (Sau khi đun): Đưa thanh nam châm lại sát Ống (2), khối chất rắn màu xám đen Iron(II) sulfide (FeS) hoàn toàn KHÔNG bị nam châm hút nữa!");
-        }
-
-        // ---------------- BÀI 3 ----------------
-        else if (actionId === 'release_gases') {
-          // Smoothly float CH4 up and sink CO2 down
-          this.customUpdaters.push(() => {
-            d.bCH4.position.y += (1.55 - d.bCH4.position.y) * 0.08;
-            d.bAir.position.y += (0.25 - d.bAir.position.y) * 0.08;
-            d.bCO2.position.y += (-0.52 - d.bCO2.position.y) * 0.08;
-          });
-          this.updatePinLabel('b_ch4', 'Khí CH₄ BAY LÊN CAO ↑', 'd = 16/29 ≈ 0,55 (Nhẹ hơn không khí)', '#38bdf8');
-          this.updatePinLabel('b_co2', 'Khí CO₂ CHÌM XUỐNG ĐÁY ↓', 'd = 44/29 ≈ 1,52 (Nặng hơn không khí)', '#f97316');
-          this.setStatus("🎈 Hiện tượng Tỉ khối chất khí: Quả bóng CH₄ (M=16, d≈0,55 < 1) bay vọt lên cao; trong khi quả bóng CO₂ (M=44, d≈1,52 > 1) nặng hơn không khí nên chìm sát xuống mặt bàn!");
-        } else if (actionId === 'pump_1mol') {
-          this.spawnBubbles(-2.7, 14, 0.02, 0x38bdf8, -0.3, 0.8, 0.5);
-          this.spawnBubbles(0, 14, 0.02, 0x22c55e, -0.3, 0.8, 0.5);
-          this.spawnBubbles(2.7, 14, 0.02, 0xf97316, -0.3, 0.8, 0.5);
-          this.setStatus("⚗️ Thể tích mol chất khí (Hình 3.2 SGK): Ở điều kiện chuẩn (25°C, 1 bar), 1 mol của bất kì chất khí nào (CH₄, Không khí, CO₂) đều chứa 6,022×10²³ phân tử và chiếm thể tích bằng nhau V = 24,79 Lít!");
-        } else if (actionId === 'pump_2mol') {
-          d.bCH4.scale.set(1.26, 1.26, 1.26);
-          d.bAir.scale.set(1.26, 1.26, 1.26);
-          d.bCO2.scale.set(1.26, 1.26, 1.26);
-          this.spawnBubbles(0, 36, 0.035, 0xfacc15, -0.5, 1.2, 2.5);
-          this.setStatus("⚗️ Khi bơm n = 2 mol khí ở ĐKC (25°C, 1 bar): Thể tích khí tăng gấp đôi V = 24,79 × 2 = 49,58 Lít (Số phân tử = 2 × 6,022×10²³ = 12,044×10²³ hạt)!");
-        }
-
-        // ---------------- BÀI 4 ----------------
-        else if (actionId === 'add_solutes') {
-          d.burner4.burnerGroup.visible = false;
-          d.c1.pptMesh.visible = true; d.c1.pptMat.color.setHex(0xffffff);
-          d.c2.pptMesh.visible = true; d.c2.pptMat.color.setHex(0x0284c7);
-          d.c3.pptMesh.visible = true; d.c3.pptMat.color.setHex(0xfef08a);
-          d.c4.pptMesh.visible = true; d.c4.pptMat.color.setHex(0xffffff);
-          this.spawnSettlingPrecipitate(-3.45, 14, 0xffffff, 0.1, -0.95, 0.45);
-          this.spawnSettlingPrecipitate(-1.15, 14, 0x0284c7, 0.1, -0.95, 0.45);
-          this.spawnSettlingPrecipitate(1.15, 14, 0xfef08a, 0.1, -0.95, 0.45);
-          this.spawnSettlingPrecipitate(3.45, 28, 0xffffff, 0.1, -0.95, 0.45);
-          this.setStatus("🥄 Bước 1: Đã cho 1 thìa muối ăn (Cốc 1), 1 thìa CuSO₄ (Cốc 2), 1 thìa sữa bột (Cốc 3) và 4 thìa muối ăn (Cốc 4) vào 20 mL nước. Bấm Bước 2 để khuấy đều!");
-        } else if (actionId === 'stir_beakers') {
-          // Stirring animation on all 4 glass rods
-          let t = 0;
-          this.customUpdaters.push(() => {
-            t += 0.18;
-            if (t < 12) {
-              d.r1.position.x = -3.45 + Math.sin(t) * 0.22;
-              d.r2.position.x = -1.15 + Math.sin(t) * 0.22;
-              d.r3.position.x = 1.15 + Math.sin(t) * 0.22;
-              d.r4.position.x = 3.45 + Math.sin(t) * 0.22;
-            }
-          });
-          d.c1.pptMesh.visible = false; d.c1.setLiquidColor(0xe0f2fe, 0.36);
-          d.c2.pptMesh.visible = false; d.c2.setLiquidColor(0x0284c7, 0.78);
-          d.c3.pptMesh.visible = false; d.c3.setLiquidColor(0xfef9c3, 0.96);
-          d.c4.pptMesh.visible = true; d.c4.pptMat.color.setHex(0xffffff);
-
-          this.updatePinLabel('c1', 'Cốc (1): DUNG DỊCH NaCl', 'Tan hết → Đồng nhất, trong suốt', '#10b981');
-          this.updatePinLabel('c2', 'Cốc (2): DUNG DỊCH CuSO₄', 'Tan hết → Trong suốt màu xanh lam', '#0284c7');
-          this.updatePinLabel('c3', 'Cốc (3): HỖN DỊCH ĐỤC', 'Sữa bột lơ lửng → KHÔNG phải dung dịch', '#facc15');
-          this.updatePinLabel('c4', 'Cốc (4): DUNG DỊCH BÃO HÒA', 'Còn muối rắn trắng lắng ở đáy cốc', '#f43f5e');
-          this.setStatus("🔄 Bước 2 (Sau khi khuấy): Cốc (1) và (2) tan hoàn toàn tạo DUNG DỊCH trong suốt; Cốc (3) đục trắng (không phải dung dịch); Cốc (4) còn muối rắn dư dưới đáy là DUNG DỊCH BÃO HÒA!");
-        } else if (actionId === 'heat_beaker4') {
-          d.burner4.burnerGroup.visible = true;
-          d.burner4.flameGroup.visible = true;
-          d.c4.pptMesh.visible = false;
-          this.spawnBubbles(3.45, 14, 0.022, 0xffffff, -0.95, 0.05, 0.45);
-          this.updatePinLabel('c4', 'Cốc (4): Đun nóng 80 °C', 'Độ tan S tăng → Muối dư ở đáy tan hết!', '#10b981');
-          this.setStatus("🔥 Bước 3 (Đun nóng Cốc 4): Khi tăng nhiệt độ của nước ở Cốc (4), độ tan S của muối tăng lên nên lượng muối rắn dưới đáy cốc đã hòa tan hết!");
-        }
-
-        // ---------------- BÀI 5 ----------------
-        else if (actionId === 'weigh_initial') {
-          d.c1.group.rotation.z = 0;
-          d.c1.group.position.set(-1.25, -0.72, 0);
-          d.c1.liqGroup.visible = true;
-          d.c2.pptMesh.visible = false;
-          d.c2.setLiquidColor(0xe0f2fe, 0.5);
-          d.stream.visible = false;
-          d.scale.setReading("35.00 g");
-          this.updatePinLabel('b5_c1', 'Cốc (1): dd BaCl₂', 'Khối lượng: 20,80 g', '#38bdf8');
-          this.updatePinLabel('b5_c2', 'Cốc (2): dd Na₂SO₄', 'Khối lượng: 14,20 g', '#38bdf8');
-          this.updatePinLabel('b5_scale', 'Cân điện tử TRƯỚC phản ứng: 35,00 g', 'm₁ = 20,80 g + 14,20 g = 35,00 g', '#10b981');
-          this.setStatus("⚖️ Bước 1: Cân điện tử hiển thị tổng khối lượng trước phản ứng m₁ = 20,80 g (dd BaCl₂) + 14,20 g (dd Na₂SO₄) = 35,00 g.");
-        } else if (actionId === 'pour_bacl2') {
-          // Lift and tilt Beaker 1 over Beaker 2, show pouring stream and white precipitate BaSO4 settling!
-          d.c1.group.position.set(0.15, 0.95, 0);
-          d.c1.group.rotation.z = -0.92;
-          d.c1.liqGroup.visible = false;
-          d.stream.visible = true;
-          setTimeout(() => { if (d.stream) d.stream.visible = false; }, 1100);
-
-          d.c2.pptMesh.visible = true;
-          d.c2.pptMat.color.setHex(0xffffff);
-          d.c2.setLiquidColor(0xf8fafc, 0.86);
-          this.spawnSettlingPrecipitate(1.25, 36, 0xffffff, 0.25, -0.55, 0.52);
-          d.scale.setReading("14.20 g");
-
-          this.updatePinLabel('b5_c1', 'Đang rót dd BaCl₂ sang Cốc (2)', 'Phản ứng trao đổi xảy ra tức thì', '#f59e0b');
-          this.updatePinLabel('b5_c2', 'Cốc (2): Xuất hiện KẾT TỦA TRẮNG BaSO₄↓', '23,30 g BaSO₄↓ + 11,70 g NaCl', '#10b981');
-          this.setStatus("🧪 Bước 2 (Rót cốc 1 vào cốc 2): Xuất hiện ngay đám mây KẾT TỦA TRẮNG Barium sulfate (BaSO₄↓) lắng xuống đáy Cốc (2)! Hãy bấm Bước 3 để đặt lại cốc (1) lên đĩa cân.");
-        } else if (actionId === 'weigh_final') {
-          d.stream.visible = false;
-          d.c1.group.rotation.z = 0;
-          d.c1.group.position.set(-1.25, -0.72, 0);
-          d.c1.liqGroup.visible = false;
-          d.c2.pptMesh.visible = true;
-          d.scale.setReading("35.00 g");
-
-          this.updatePinLabel('b5_c1', 'Cốc (1): Đã rót hết sang Cốc (2)', 'Đặt trở lại trên đĩa cân', '#94a3b8');
-          this.updatePinLabel('b5_c2', 'Cốc (2): Kết tủa trắng BaSO₄↓ + dd NaCl', 'Tổng sản phẩm = 23,30 + 11,70 = 35,00 g', '#10b981');
-          this.updatePinLabel('b5_scale', 'Cân điện tử SAU phản ứng: 35,00 g', 'm₁ = m₂ = 35,00 g (Định luật BTKL)', '#10b981');
-          this.setStatus("✅ Bước 3 (Kiểm chứng Định luật Bảo toàn khối lượng): Đặt cốc (1) trở lại đĩa cân → Màn hình LED vẫn chỉ đúng 35,00 g (m_BaCl₂ + m_Na₂SO₄ = m_BaSO₄ + m_NaCl)!");
-        }
-
-        // ---------------- BÀI 6 ----------------
-        else if (actionId === 'pass_h2') {
-          d.burner.flameGroup.visible = false;
-          this.spawnBubbles(-1.8, 18, 0.025, 0x38bdf8, 0.15, 0.55, 0.8);
-          this.updatePinLabel('b6_h2', 'Đang dẫn dòng khí H₂ tinh khiết →', 'Đuổi hết không khí trong ống sứ', '#38bdf8');
-          this.setStatus("💨 Bước 1: Dẫn dòng khí Hydrogen (H₂) đi qua ống sứ chứa 8,0 gam (0,05 mol) bột Fe₂O₃ màu đỏ nâu. Bấm Bước 2 để bật đèn cồn nung nóng!");
-        } else if (actionId === 'heat_furnace') {
-          d.burner.flameGroup.visible = true;
-          d.solidFe2O3.material.color.setHex(0x64748b); // Chuyển từ đỏ nâu sang xám sắt Fe
-          d.waterDrops.visible = true;
-          this.spawnBubbles(1.8, 16, 0.025, 0xbae6fd, 0.15, 0.55, 0.5);
-          this.updatePinLabel('b6_solid', 'Đã khử thành bột Sắt (Fe) màu xám trắng!', 'Fe₂O₃ (đỏ nâu) + 3H₂ → 2Fe (xám) + 3H₂O', '#10b981');
-          this.updatePinLabel('b6_h2o', 'Hơi nước H₂O ngưng tụ trên thành ống!', 'Các giọt nước xanh nhạt bám bên phải ống', '#38bdf8');
-          this.setStatus("🔥 Bước 2 (Nung nóng): Ở nhiệt độ cao, khí H₂ chiếm oxygen của Fe₂O₃ làm bột màu đỏ nâu chuyển thành bột Sắt (Fe) màu xám và tạo các giọt nước (H₂O) ngưng tụ ở đầu phải ống sứ!");
-        } else if (actionId === 'weigh_fe_yield') {
-          d.burner.flameGroup.visible = false;
-          this.updatePinLabel('b6_solid', 'Thu được 4,2 g Sắt (Fe) thực tế', 'Lí thuyết = 5,6 g → Hiệu suất H = 75%', '#facc15');
-          this.setStatus("📊 Bước 3 (Tính theo PTHH & Hiệu suất): Từ 0,05 mol Fe₂O₃, theo lí thuyết thu được 0,1 mol Fe (5,6 g). Thực tế thu được 4,2 g Fe → Hiệu suất H = (4,2 / 5,6) × 100% = 75%!");
-        }
-
-        // ---------------- BÀI 7 ----------------
-        else if (actionId === 'rate_conc') {
-          d.leftV.setLiquidColor(0xbae6fd, 0.45);
-          d.rightV.setLiquidColor(0x38bdf8, 0.65);
-          d.leftV.pptMat.color.setHex(0x94a3b8);
-          d.rightV.pptMat.color.setHex(0x94a3b8);
-          this.spawnBubbles(-1.8, 7, 0.012, 0xffffff, -0.95, 0.25, 0.35);
-          this.spawnBubbles(1.8, 42, 0.048, 0xffffff, -0.95, 0.25, 0.45);
-          this.updatePinLabel('b7_left', 'Ống A: Mg + HCl 0,1 M (Loãng)', 'Bọt khí H₂↑ thoát ra rất chậm', '#38bdf8');
-          this.updatePinLabel('b7_right', 'Ống B: Mg + HCl 1,0 M (Đặc hơn 10 lần)', 'Bọt khí H₂↑ sủi dày đặc, Mg tan nhanh!', '#10b981');
-          this.setStatus("🧪 Yếu tố 1 – Nồng độ (Hình 7.3 SGK): Ống B (dung dịch HCl 1,0 M) có nồng độ lớn hơn nên sủi bọt khí H₂↑ nhanh và mạnh gấp nhiều lần Ống A (HCl 0,1 M)!");
-        } else if (actionId === 'rate_temp') {
-          d.leftV.setLiquidColor(0x38bdf8, 0.55);
-          d.rightV.setLiquidColor(0xf97316, 0.65);
-          d.leftV.pptMat.color.setHex(0xfb923c);
-          d.rightV.pptMat.color.setHex(0xfb923c);
-          this.spawnBubbles(-1.8, 9, 0.014, 0xffffff, -0.95, 0.25, 0.35);
-          this.spawnBubbles(1.8, 46, 0.052, 0xffffff, -0.95, 0.25, 0.45);
-          this.updatePinLabel('b7_left', 'Ống A: Viên C sủi + Nước lạnh (15 °C)', 'Sủi bọt chậm, lâu tan hết', '#38bdf8');
-          this.updatePinLabel('b7_right', 'Ống B: Viên C sủi + Nước nóng (65 °C)', 'Sủi bọt mãnh liệt, tan cực nhanh!', '#f97316');
-          this.setStatus("🌡️ Yếu tố 2 – Nhiệt độ (Hình 7.4 SGK): Trong Cốc B (Nước nóng 65 °C), viên C sủi phản ứng giải phóng bọt khí CO₂↑ mãnh liệt và tan hết nhanh hơn hẳn Cốc A (Nước lạnh)!");
-        } else if (actionId === 'rate_surface') {
-          d.leftV.setLiquidColor(0xe0f2fe, 0.5);
-          d.rightV.setLiquidColor(0xe0f2fe, 0.5);
-          d.leftV.pptMat.color.setHex(0xf8fafc);
-          d.rightV.pptMat.color.setHex(0xf8fafc);
-          this.spawnBubbles(-1.8, 8, 0.014, 0xffffff, -0.95, 0.25, 0.35);
-          this.spawnBubbles(1.8, 40, 0.046, 0xffffff, -0.95, 0.25, 0.45);
-          this.updatePinLabel('b7_left', 'Ống A: 1 g Đá vôi DẠNG VIÊN + HCl', 'Diện tích tiếp xúc nhỏ → Sủi bọt chậm', '#94a3b8');
-          this.updatePinLabel('b7_right', 'Ống B: 1 g Đá vôi ĐẬP NHỎ DẠNG BỘT + HCl', 'Diện tích tiếp xúc lớn → Sủi bọt CO₂ cực mạnh!', '#10b981');
-          this.setStatus("🪨 Yếu tố 3 – Diện tích bề mặt tiếp xúc: Cùng 1 gam đá vôi CaCO₃ nhưng ở Ống B (đập nhỏ dạng bột) có diện tích tiếp xúc với HCl lớn hơn nên khí CO₂↑ thoát ra nhanh hơn hẳn Ống A!");
-        } else if (actionId === 'rate_catalyst') {
-          d.leftV.setLiquidColor(0xe0f2fe, 0.45);
-          d.rightV.setLiquidColor(0xe0f2fe, 0.55);
-          d.leftV.pptMesh.visible = false;
-          d.rightV.pptMesh.visible = true;
-          d.rightV.pptMat.color.setHex(0x0f172a); // Bột đen MnO2
-          this.spawnBubbles(-1.8, 2, 0.007, 0xffffff, -0.95, 0.25, 0.25);
-          this.spawnBubbles(1.8, 52, 0.058, 0xffffff, -0.95, 0.25, 0.48);
-          this.updatePinLabel('b7_left', 'Ống A: Chỉ có dd H₂O₂ 3%', 'Phân hủy cực chậm (hầu như không bọt)', '#64748b');
-          this.updatePinLabel('b7_right', 'Ống B: dd H₂O₂ 3% + Xúc tác bột đen MnO₂', 'Sủi bọt khí O₂↑ trắng xóa tức thì!', '#10b981');
-          this.setStatus("⚡ Yếu tố 4 – Chất xúc tác (Hình 7.5 SGK): Khi rắc một ít bột đen MnO₂ vào Ống B, H₂O₂ phân hủy thành H₂O + O₂↑ cực nhanh, và khối lượng MnO₂ không bị tiêu hao sau phản ứng!");
-        }
-
-        // ---------------- BÀI 8 ----------------
-        else if (actionId === 'acid_litmus') {
-          this.dripLiquid({
-            x: -3.4, startY: 1.3, targetY: 0.4, color: 0xef4444, count: 2,
-            onComplete: () => {
-              d.litmus.material.color.setHex(0xef4444);
-              this.updatePinLabel('b8_lit', 'Giấy quỳ tím HÓA ĐỎ!', 'Dấu hiệu nhận biết dung dịch Acid (H⁺)', '#ef4444');
-            }
-          });
-          this.setStatus("🟥 Bước 1 (Thử quỳ tím): Nhỏ dung dịch Hydrochloric acid (HCl) lên mẫu giấy quỳ tím → Giấy quỳ chuyển ngay từ màu tím sang MÀU ĐỎ TƯƠI!");
-        } else if (actionId === 'acid_metals') {
-          // Drop Zn, Fe, Cu into the 3 HCl tubes
-          d.znPellet.position.y = -0.82;
-          d.feNail.position.y = -0.55;
-          d.cuPlate.position.y = -0.72;
-          d.tFe.setLiquidColor(0x86efac, 0.62); // FeCl2 pale green
-          this.spawnBubbles(-1.1, 32, 0.04, 0xffffff, -0.95, 0.15, 0.36);
-          this.spawnBubbles(1.0, 20, 0.026, 0xffffff, -0.95, 0.15, 0.36);
-          // Notice: NO bubbles in tCu (x = 3.1)!
-          this.updatePinLabel('b8_zn', 'Ống (1): Zn tan + Sủi bọt khí H₂↑ mạnh', 'Zn + 2HCl → ZnCl₂ + H₂↑', '#10b981');
-          this.updatePinLabel('b8_fe', 'Ống (2): Fe tan + Sủi bọt H₂↑ vừa', 'Fe + 2HCl → FeCl₂ (lục nhạt) + H₂↑', '#22c55e');
-          this.updatePinLabel('b8_cu', 'Ống (3): Đồng (Cu) KHÔNG phản ứng!', 'Không có bọt khí • Cu không tan trong HCl', '#f97316');
-          this.setStatus("🫧 Bước 2 (Tác dụng với kim loại): Ở Ống (1) và (2), Kẽm (Zn) và Sắt (Fe) tan dần, giải phóng nhiều bọt khí H₂↑ không màu (dung dịch FeCl₂ có màu lục nhạt). Riêng Ống (3) chứa Đồng (Cu) KHÔNG có bọt khí vì Cu không tác dụng với dung dịch HCl!");
-        } else if (actionId === 'acid_ions') {
-          this.spawnBubbles(-1.1, 24, 0.018, 0xef4444, -0.95, 0.15, 0.36);
-          this.spawnBubbles(1.0, 24, 0.018, 0xef4444, -0.95, 0.15, 0.36);
-          this.spawnBubbles(3.1, 24, 0.018, 0xef4444, -0.95, 0.15, 0.36);
-          this.setStatus("🔍 Bước 3 (Bản chất vi mô Bảng 8.1 SGK): Trong dung dịch nước, mọi phân tử Acid (HCl, H₂SO₄, CH₃COOH) đều phân li tạo ra các cation H⁺ (hạt màu đỏ) quyết định tính chất hóa học của Acid!");
-        }
-
-        // ---------------- BÀI 9 ----------------
-        else if (actionId === 'add_phenol') {
-          d.litmus.material.color.setHex(0x2563eb); // Quỳ tím hóa xanh
-          this.updatePinLabel('b9_lit', 'Quỳ tím HÓA XANH!', 'Dung dịch kiềm NaOH (pH > 7)', '#2563eb');
-          this.dripLiquid({
-            x: 0, startY: 1.5, targetY: 0.0, color: 0xec4899, count: 3,
-            onComplete: () => {
-              d.mainVessel.setLiquidColor(0xec4899, 0.85);
-              this.updatePinLabel('b9_main', 'Cốc giữa: NaOH + Phenolphthalein', 'Chuyển sang MÀU HỒNG TƯƠI (pH = 13,0)', '#ec4899');
-            }
-          });
-          this.setStatus("💧 Bước 1 (Thử chất chỉ thị với Kiềm NaOH): Giấy quỳ tím chuyển sang MÀU XANH; nhỏ 2–3 giọt Phenolphthalein vào cốc NaOH làm dung dịch chuyển sang MÀU HỒNG TƯƠI!");
-        } else if (actionId === 'drip_hcl_half') {
-          this.dripLiquid({
-            x: 0, startY: 1.5, targetY: 0.0, color: 0x38bdf8, count: 3,
-            onComplete: () => {
-              d.mainVessel.setLiquidColor(0xf9a8d4, 0.68);
-              d.cuVessel.pptMesh.visible = true;
-              d.cuVessel.pptMat.color.setHex(0x0284c7);
-              this.spawnSettlingPrecipitate(3.0, 24, 0x0284c7, 0.1, -0.9, 0.38);
-              this.updatePinLabel('b9_main', 'Đang nhỏ HCl: Màu hồng nhạt dần', 'Một phần NaOH đã bị trung hòa (pH ≈ 9,5)', '#f472b6');
-              this.updatePinLabel('b9_cu', 'Ống phải: Tạo kết tủa Cu(OH)₂↓', 'Base không tan màu XANH LAM', '#0284c7');
-            }
-          });
-          this.setStatus("🧪 Bước 2: Nhỏ từ từ dung dịch HCl loãng vào cốc NaOH → Màu hồng nhạt dần. Đồng thời ở ống bên phải, nhỏ NaOH vào CuSO₄ tạo kết tủa keo MÀU XANH LAM Cu(OH)₂↓!");
-        } else if (actionId === 'drip_hcl_full') {
-          this.dripLiquid({
-            x: 0, startY: 1.5, targetY: 0.0, color: 0x38bdf8, count: 3,
-            onComplete: () => {
-              d.mainVessel.setLiquidColor(0xf8fafc, 0.42);
-              this.updatePinLabel('b9_main', 'Trung hòa hoàn toàn: MẤT MÀU HỒNG!', 'NaOH + HCl → NaCl + H₂O (pH = 7,0)', '#10b981');
-            }
-          });
-          this.setStatus("✨ Bước 3 (Phản ứng trung hòa hoàn toàn - Hình 9.1 SGK): Khi HCl vừa đủ tác dụng hết với NaOH (NaOH + HCl → NaCl + H₂O), dung dịch MẤT MÀU HỒNG hoàn toàn, trở về môi trường trung tính pH = 7,0!");
-        }
-
-        // ---------------- BÀI 10 ----------------
-        else if (actionId === 'oxide_co2') {
-          this.spawnBubbles(-3.1, 24, 0.032, 0xffffff, -0.95, 0.0, 0.32);
-          this.spawnBubbles(-0.5, 20, 0.026, 0xffffff, -0.95, 0.1, 0.32);
-          d.t2.setLiquidColor(0xffffff, 0.92);
-          d.t2.pptMesh.visible = true;
-          d.t2.pptMat.color.setHex(0xffffff);
-          this.spawnSettlingPrecipitate(-0.5, 25, 0xffffff, 0.0, -0.95, 0.32);
-          this.updatePinLabel('b10_t1', 'Ống (1): Đang sủi bọt khí CO₂↑', 'CaCO₃ + 2HCl → CaCl₂ + CO₂↑ + H₂O', '#38bdf8');
-          this.updatePinLabel('b10_t2', 'Ống (2): Nước vôi trong VẨN ĐỤC TRẮNG!', 'CO₂ + Ca(OH)₂ → CaCO₃↓ (trắng) + H₂O', '#10b981');
-          this.setStatus("🫧 Bước 1 (Tính chất của Oxide acid CO₂): Khí CO₂ sinh ra từ Ống (1) dẫn qua ống thủy tinh chữ L sục vào Ống (2) làm nước vôi trong Ca(OH)₂ bị VẨN ĐỤC TRẮNG do tạo kết tủa CaCO₃↓!");
-        } else if (actionId === 'oxide_cuo') {
-          d.t3.pptMesh.visible = false;
-          d.t3.setLiquidColor(0x0284c7, 0.84);
-          this.updatePinLabel('b10_t3', 'Ống (3): CuO đen tan → dd CuSO₄ XANH LAM!', 'CuO + H₂SO₄ → CuSO₄ + H₂O', '#0284c7');
-          this.setStatus("💙 Bước 2 (Tính chất của Oxide base CuO): Bột Copper(II) oxide (CuO) màu đen ở đáy Ống (3) tan dần trong dung dịch H₂SO₄ loãng, tạo thành dung dịch muối Copper(II) sulfate (CuSO₄) có MÀU XANH LAM đặc trưng!");
-        } else if (actionId === 'oxide_rust') {
-          d.t4.pptMesh.visible = false;
-          d.t4.setLiquidColor(0xd97706, 0.82);
-          this.updatePinLabel('b10_t4', 'Ống (4): Fe₂O₃ tan → dd FeCl₃ VÀNG NÂU!', 'Fe₂O₃ + 6HCl → 2FeCl₃ + 3H₂O', '#f59e0b');
-          this.setStatus("✨ Bước 3 (Tẩy gỉ sắt bằng Acid): Bột Iron(III) oxide (Fe₂O₃) màu đỏ nâu ở đáy Ống (4) tác dụng với dung dịch HCl tan hết tạo thành dung dịch muối Iron(III) chloride (FeCl₃) có MÀU VÀNG NÂU!");
-        }
-
-        // ---------------- BÀI 11 ----------------
-        else if (actionId === 'salt_tube1') {
-          d.nailBottom.material.color.setHex(0xc2410c); // Lớp kim loại đồng Cu màu đỏ gạch bám ngoài đinh sắt
-          d.nailBottom.scale.set(1.35, 1.0, 1.35);
-          d.u1.setLiquidColor(0x7dd3fc, 0.55); // Màu xanh lam nhạt dần
-          this.updatePinLabel('b11_1', 'Ống (1): Đồng (Cu) ĐỎ bám vào đinh sắt!', 'Fe + CuSO₄ → FeSO₄ + Cu↓ (Màu xanh nhạt dần)', '#f97316');
-          this.setStatus("🔩 Ống nghiệm (1) (Hình 11.1a SGK): Kim loại Sắt (Fe) đẩy Đồng (Cu) ra khỏi dung dịch muối CuSO₄ → Có lớp kim loại Đồng (Cu) MÀU ĐỎ bám ngoài phần đinh sắt ngập trong dung dịch, và màu xanh lam của dung dịch nhạt dần!");
-        } else if (actionId === 'salt_tube23') {
-          this.dripLiquid({
-            x: -1.1, startY: 1.4, targetY: 0.1, color: 0xbae6fd, count: 3,
-            onComplete: () => {
-              d.u2.pptMesh.visible = true; d.u2.pptMat.color.setHex(0xffffff);
-              d.u2.setLiquidColor(0xf8fafc, 0.85);
-              this.spawnSettlingPrecipitate(-1.1, 26, 0xffffff, 0.05, -0.95, 0.35);
-              this.updatePinLabel('b11_2', 'Ống (2): Kết tủa TRẮNG BaSO₄↓', 'BaCl₂ + H₂SO₄ → BaSO₄↓ + 2HCl', '#10b981');
-            }
-          });
-          this.dripLiquid({
-            x: 1.1, startY: 1.4, targetY: 0.1, color: 0xbae6fd, count: 3,
-            onComplete: () => {
-              d.u3.pptMesh.visible = true; d.u3.pptMat.color.setHex(0xffffff);
-              d.u3.setLiquidColor(0xf8fafc, 0.85);
-              this.spawnSettlingPrecipitate(1.1, 26, 0xffffff, 0.05, -0.95, 0.35);
-              this.updatePinLabel('b11_3', 'Ống (3): Kết tủa TRẮNG BaSO₄↓', 'BaCl₂ + Na₂SO₄ → BaSO₄↓ + 2NaCl', '#10b981');
-            }
-          });
-          this.setStatus("🥛 Ống nghiệm (2) & (3) (Hình 11.1b,c SGK): Nhỏ dung dịch BaCl₂ vào ống (2) chứa H₂SO₄ và ống (3) chứa Na₂SO₄ → Cả 2 ống đều xuất hiện KẾT TỦA TRẮNG Barium sulfate (BaSO₄↓) lắng xuống đáy ống!");
-        } else if (actionId === 'salt_tube4') {
-          this.dripLiquid({
-            x: 3.3, startY: 1.4, targetY: 0.1, color: 0xec4899, count: 3,
-            onComplete: () => {
-              d.u4.pptMesh.visible = true; d.u4.pptMat.color.setHex(0x0284c7);
-              d.u4.setLiquidColor(0x38bdf8, 0.88);
-              this.spawnSettlingPrecipitate(3.3, 28, 0x0284c7, 0.05, -0.95, 0.35);
-              this.updatePinLabel('b11_4', 'Ống (4): Kết tủa XANH LAM Cu(OH)₂↓', 'CuSO₄ + 2NaOH → Cu(OH)₂↓ + Na₂SO₄', '#0284c7');
-            }
-          });
-          this.setStatus("💎 Ống nghiệm (4) (Hình 11.1d SGK): Nhỏ dung dịch NaOH vào dung dịch CuSO₄ → Xuất hiện ngay chất KẾT TỦA MÀU XANH LAM của Copper(II) hydroxide Cu(OH)₂↓!");
-        }
-
-        // ---------------- BÀI 12 ----------------
-        else if (actionId === 'fert_n') {
-          d.stem.scale.set(1.12, 1.42, 1.12);
-          d.crown.scale.set(1.35, 1.35, 1.35);
-          d.crown.material.color.setHex(0x16a34a);
-          this.updatePinLabel('b12_plant', 'Đã bón Phân Đạm (Nitrogen - N)', 'Thân cao vọt, tán lá phát triển xanh đậm!', '#10b981');
-          this.setStatus("🌿 Bước 1 – Bón Phân Đạm (cung cấp Nitrogen: Urea, NH₄NO₃, NaNO₃): Tất cả phân đạm đều tan tốt trong nước, thúc đẩy cây trồng phát triển mạnh thân và lá xanh tốt!");
-        } else if (actionId === 'fert_p') {
-          d.rootsGroup.scale.set(1.45, 1.55, 1.45);
-          d.flowersGroup.visible = true;
-          d.flowersGroup.scale.set(1.3, 1.3, 1.3);
-          this.updatePinLabel('b12_roots', 'Đã bón Phân Lân (Phosphorus - P)', 'Bộ rễ đâm sâu rộng • Cây nở hoa & đậu quả!', '#ec4899');
-          this.setStatus("🌸 Bước 2 – Bón Phân Lân (cung cấp Phosphorus: Ca₃(PO₄)₂, Ca(H₂PO₄)₂): Kích thích bộ rễ phát triển sâu rộng dưới đất, giúp cây nở hoa nhiều và đậu quả to!");
-        } else if (actionId === 'fert_k_npk') {
-          d.stem.scale.set(1.45, 1.48, 1.45);
-          d.crown.scale.set(1.45, 1.45, 1.45);
-          d.flowersGroup.visible = true;
-          this.updatePinLabel('b12_plant', 'Đã bón Phân Kali (K) & NPK tổng hợp', 'Thân cây cứng cáp, chịu lạnh tốt, cân đối dinh dưỡng', '#facc15');
-          this.setStatus("🌳 Bước 3 – Bón Phân Kali (KCl, K₂SO₄) & NPK: Giúp hình thành mô tế bào làm thân cây cứng cáp, phân nhiều nhánh và chịu lạnh tốt. Cần tuân thủ quy tắc '4 đúng'!");
-        } else if (actionId === 'fert_compost') {
-          d.bin.setLiquidColor(0x78350f, 0.94);
-          this.spawnBubbles(2.0, 18, 0.014, 0x86efac, -0.95, 0.1, 0.55);
-          this.updatePinLabel('b12_bin', 'Thùng ủ sau 25 – 30 ngày: Phân hữu cơ!', 'Rác thực vật phân hủy thành mùn nâu đen tơi xốp', '#10b981');
-          this.setStatus("♻️ Bước 4 – Ủ phân hữu cơ 5 Lít (Hình 12.3 SGK): Sau 25–30 ngày ủ 3 kg rác thực vật băm nhỏ với 6 g chế phẩm vi sinh Trichoderma – Bacillus (giữ ẩm, không dùng thức ăn động vật), rác phân hủy thành mùn hữu cơ giàu dinh dưỡng!");
-        }
-      }
-
-      setStatus(msg) {
-        if (this.statusEl) this.statusEl.innerHTML = msg;
-      }
-
-      animate() {
-        requestAnimationFrame(() => this.animate());
-
-        this.updateCameraPos(false);
-
-        // 1. Animate rising gas bubbles
-        const now = Date.now() * 0.005;
-        this.bubbles.forEach(b => {
-          b.mesh.position.y += b.speed;
-          b.mesh.position.x = b.baseX + Math.sin(now + b.mesh.position.y * 5) * 0.12;
-          if (b.mesh.position.y > b.maxY) {
-            b.mesh.position.y = b.minY;
-          }
-        });
-
-        // 2. Animate falling liquid drops from dropper pipettes
-        for (let i = this.drops.length - 1; i >= 0; i--) {
-          const dr = this.drops[i];
-          dr.mesh.position.y -= dr.speed;
-          if (dr.mesh.position.y <= dr.targetY) {
-            this.rootGroup.remove(dr.mesh);
-            if (dr.isLast && typeof dr.onComplete === 'function') {
-              dr.onComplete();
-            }
-            this.drops.splice(i, 1);
-          }
-        }
-
-        // 3. Animate settling flocculent precipitate particles
-        this.settlingParticles.forEach(p => {
-          if (p.mesh.position.y > p.bottomY) {
-            p.mesh.position.y -= p.speed;
-          }
-        });
-
-        // 4. Flicker alcohol burner flames naturally
-        if (this.dynamicObjects.burner && this.dynamicObjects.burner.flameGroup.visible) {
-          const s = 1 + Math.sin(Date.now() * 0.025) * 0.08;
-          this.dynamicObjects.burner.outerFlame.scale.set(s, 1 / s, s);
-        }
-        if (this.dynamicObjects.burner4 && this.dynamicObjects.burner4.flameGroup.visible) {
-          const s = 1 + Math.sin(Date.now() * 0.025) * 0.08;
-          this.dynamicObjects.burner4.outerFlame.scale.set(s, 1 / s, s);
-        }
-
-        // 5. Run custom per-frame updaters
-        this.customUpdaters.forEach(fn => fn());
-
-        this.renderer.render(this.scene, this.camera);
-        this.projectLabels();
-      }
-    }
-
-    let embeddedLab3D = null;
-    let fullLab3D = null;
-    let currentLessonId = 2;
+        let currentLessonId = 2;
     let userQuizAnswers = {};
     let userFillAnswers = {};
 
@@ -3583,11 +2227,7 @@
 
       if (tabId === 'lab3d') {
         setTimeout(() => {
-          loadLab3DScene(currentLessonId, 'full');
-        }, 50);
-      } else if (tabId === 'syllabus') {
-        setTimeout(() => {
-          if (embeddedLab3D) embeddedLab3D.resize();
+          loadVideoLab(currentLessonId);
         }, 50);
       }
       renderMathInContainer(document.getElementById('tab-' + tabId));
@@ -3624,6 +2264,7 @@
       renderLessonSidebar();
       const lesson = COURSE_DATA.find(l => l.lesson_id === lessonId);
       const container = document.getElementById('lesson-detail-container');
+      if (!lesson || !container) return;
 
       const objectivesHtml = lesson.objectives.map(o => `<li class="flex items-start gap-2"><span class="text-teal-600 font-bold">✓</span><span>${o}</span></li>`).join('');
       const theoryHtml = lesson.theory_summary.map(t => `<div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 text-sm leading-relaxed text-slate-800">${t}</div>`).join('');
@@ -3645,22 +2286,17 @@
         </button>
       `).join('');
 
-      const actionButtonsHtml = lesson.lab3d_meta.actions.map(act => `
-        <button onclick="embeddedLab3D.triggerAction('${act.id}')" class="w-full text-left px-3.5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow transition">
-          ${act.label}
-        </button>
-      `).join('');
-
       container.innerHTML = `
         <!-- Header Card -->
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-indigo-100 text-indigo-800">${lesson.chapter}</span>
             <div class="flex flex-wrap gap-2">
-              <button onclick="switchMainTab('lab3d'); document.getElementById('full-lab3d-select').value='${lesson.lesson_id}'; loadLab3DScene(${lesson.lesson_id}, 'full');" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white transition shadow-sm">
-                🧊 Mở Phòng Lab 3D Toàn Màn Hình
+              <button onclick="switchMainTab('lab3d'); loadVideoLab(${lesson.lesson_id});" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white transition shadow-sm flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                Mở Video Lab Toàn Màn Hình
               </button>
-              <button onclick="switchMainTab('quiz'); document.getElementById('quiz-lesson-filter').value='${lesson.lesson_id}'; renderQuizBank();" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-teal-600 hover:bg-teal-700 text-white transition shadow-sm">
+              <button onclick="switchMainTab('quiz'); document.getElementById('quiz-lesson-filter').value='${lesson.lesson_id}'; renderQuizBank();" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-teal-600 hover:bg-teal-700 text-white transition shadow-sm">
                 ✍️ Làm 10 Bài Tập Tự Ôn Bài ${lesson.lesson_id}
               </button>
             </div>
@@ -3674,48 +2310,55 @@
           </div>
         </div>
 
-        <!-- MÔ PHỎNG THÍ NGHIỆM 3D ĐẶC SẮC NGAY TRONG BÀI HỌC -->
+        <!-- VIDEO THÍ NGHIỆM THỰC HÀNH CHUẨN SGK NGAY TRONG BÀI HỌC -->
         <div class="bg-slate-900 text-white rounded-2xl p-5 shadow-lg border border-slate-800">
           <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-800">
             <div>
-              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-500/20 text-teal-300 border border-teal-500/30">Mô phỏng Thí nghiệm 3D Có Nhãn Chú Thích Trực Tiếp</span>
-              <h3 class="text-lg font-extrabold mt-1">${lesson.lab3d_meta.name}</h3>
+              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">🎬 Video Thí Nghiệm Thực Tế Chuẩn SGK</span>
+              <h3 class="text-lg font-extrabold mt-1 text-white">${lesson.video_lab.name}</h3>
             </div>
-            <div class="flex flex-wrap items-center gap-1.5">
-              <button onclick="embeddedLab3D && embeddedLab3D.setCameraPreset('closeup')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-indigo-600 text-xs font-bold text-slate-200 border border-slate-700">
-                🔍 Cận cảnh
-              </button>
-              <button onclick="embeddedLab3D && embeddedLab3D.setCameraPreset('overview')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-indigo-600 text-xs font-bold text-slate-200 border border-slate-700">
-                🎥 Toàn cảnh
-              </button>
-              <button onclick="embeddedLab3D && embeddedLab3D.toggleLabels()" class="px-2.5 py-1.5 rounded-lg bg-teal-700 hover:bg-teal-600 text-xs font-bold text-white">
-                🏷️ Nhãn 3D
-              </button>
-              <button onclick="embeddedLab3D && embeddedLab3D.loadLesson(${lesson.lesson_id})" class="px-2.5 py-1.5 rounded-lg bg-rose-600/80 hover:bg-rose-600 text-xs font-bold text-white">
-                ↺ Đặt lại
+            <div class="flex flex-wrap items-center gap-2">
+              <a href="${lesson.video_lab.youtube_url}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-xs font-bold text-white transition flex items-center gap-1.5 shadow">
+                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                Xem trên YouTube ↗
+              </a>
+              <button onclick="switchMainTab('lab3d'); loadVideoLab(${lesson.lesson_id});" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-bold text-slate-200 transition">
+                📺 Mở toàn màn hình Video Lab
               </button>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 mt-4">
-            <div class="lg:col-span-7 flex flex-col gap-2.5">
-              <div class="relative rounded-xl overflow-hidden bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950 border-2 border-slate-700 h-[390px]">
-                <div id="embedded-lab3d-canvas" class="w-full h-full relative"></div>
-                <div class="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-slate-900/85 text-[11px] text-slate-200 border border-white/15 pointer-events-none z-20">
-                  🖱️ Kéo để xoay 360° • Cuộn để Zoom
-                </div>
-                <div id="embedded-lab3d-status" class="absolute bottom-2.5 left-2.5 right-2.5 p-3 rounded-xl bg-slate-950/95 backdrop-blur border-l-4 border-teal-400 border-t border-r border-b border-white/15 text-xs text-white font-medium shadow-xl z-20"></div>
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-4">
+            <!-- 16:9 Video Player -->
+            <div class="lg:col-span-7 flex flex-col gap-3">
+              <div id="tab1-video-container" class="relative rounded-xl overflow-hidden bg-black border-2 border-slate-700 shadow-xl aspect-video w-full">
+                ${renderTab1VideoPlayer(lesson)}
               </div>
-              <div id="embedded-lab3d-telemetry" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5"></div>
+              <div class="bg-emerald-950/70 border border-emerald-500/30 p-3 rounded-xl text-xs text-emerald-200 leading-relaxed">
+                <strong class="text-emerald-400">👁️ Hiện tượng thực tế:</strong> ${lesson.video_lab.phenomenon}
+              </div>
             </div>
+
+            <!-- Companion info -->
             <div class="lg:col-span-5 flex flex-col justify-between bg-slate-800/85 rounded-xl p-4 border border-slate-700 space-y-3">
-              <div class="space-y-2.5">
-                <p class="text-xs text-slate-200 leading-relaxed bg-slate-900/70 p-3 rounded-xl border border-slate-700">${lesson.lab3d_meta.desc}</p>
-                <div class="text-xs font-bold text-amber-300 uppercase pt-1">Bấm các bước tiến hành thí nghiệm 3D:</div>
-                <div class="space-y-2">${actionButtonsHtml}</div>
+              <div class="space-y-2">
+                <div class="text-[11px] font-bold text-amber-300 uppercase">Dụng cụ & Hóa chất:</div>
+                <div class="text-xs text-slate-300 bg-slate-900/60 p-2.5 rounded-lg border border-slate-700">
+                  <div><strong>Dụng cụ:</strong> ${lesson.video_lab.apparatus}</div>
+                  <div class="mt-1"><strong>Hóa chất:</strong> ${lesson.video_lab.chemicals}</div>
+                </div>
+
+                <div class="text-[11px] font-bold text-teal-300 uppercase pt-1">Các bước thực hiện:</div>
+                <ol class="text-xs text-slate-200 space-y-1 list-decimal list-inside bg-slate-900/50 p-2.5 rounded-lg border border-slate-700">
+                  ${lesson.video_lab.steps.map(s => `<li>${s}</li>`).join('')}
+                </ol>
               </div>
-              <div class="p-3 rounded-xl bg-slate-950 text-indigo-200 text-xs overflow-x-auto border border-indigo-500/30">
-                ${lesson.lab3d_meta.equation}
+
+              <div>
+                <div class="text-[11px] font-bold text-rose-300 uppercase mb-1">Phương trình hóa học:</div>
+                <div class="p-3 rounded-xl bg-slate-950 text-indigo-200 text-xs overflow-x-auto border border-indigo-500/30">
+                  ${lesson.video_lab.equation}
+                </div>
               </div>
             </div>
           </div>
@@ -3766,67 +2409,269 @@
       `;
 
       renderMathInContainer(container);
-
-      // Initialize Embedded 3D Lab
-      setTimeout(() => {
-        const canvasEl = document.getElementById('embedded-lab3d-canvas');
-        const statusEl = document.getElementById('embedded-lab3d-status');
-        const teleEl = document.getElementById('embedded-lab3d-telemetry');
-        if (canvasEl) {
-          embeddedLab3D = new Lab3DSimulator(canvasEl, statusEl, null, teleEl);
-          embeddedLab3D.loadLesson(lessonId);
-        }
-      }, 30);
     }
 
-    // 3. PHÒNG THÍ NGHIỆM 3D TOÀN MÀN HÌNH (TAB 2)
-    function loadLab3DScene(lessonId, mode = 'full') {
+    // 3. TRUNG TÂM VIDEO THÍ NGHIỆM THỰC HÀNH (TAB 2)
+    let currentActiveVideoId = null;
+    window.forceIframeModeTab1 = false;
+    window.forceIframeModeTab2 = false;
+
+    function getEmbedUrl(videoId, autoplay = false) {
+      let url = 'https://www.youtube.com/embed/' + videoId + '?rel=0&enablejsapi=1';
+      if (autoplay) url += '&autoplay=1';
+      if (window.location.protocol.startsWith('http') && window.location.origin && window.location.origin !== 'null') {
+        url += '&origin=' + encodeURIComponent(window.location.origin);
+      }
+      return url;
+    }
+
+    function renderTab1VideoPlayer(lesson) {
+      const isFile = window.location.protocol === 'file:' && !window.forceIframeModeTab1;
+      const videoId = lesson.video_lab.youtube_id;
+      const embedUrl = getEmbedUrl(videoId);
+
+      if (isFile) {
+        return `
+          <div class="relative w-full h-full min-h-[220px] bg-slate-950 flex flex-col items-center justify-center p-4 text-center z-10 bg-cover bg-center group" style="background-image: url('https://img.youtube.com/vi/${videoId}/hqdefault.jpg');">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/85 to-slate-900/80"></div>
+            <div class="relative z-10 flex flex-col items-center max-w-md mx-auto space-y-2.5">
+              <div class="w-12 h-12 rounded-full bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center shadow-lg hover:scale-110 transition cursor-pointer" onclick="window.open('${lesson.video_lab.youtube_url}', '_blank')">
+                <svg class="w-6 h-6 fill-current ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              </div>
+              <h4 class="text-xs md:text-sm font-bold text-white leading-snug">${lesson.video_lab.name}</h4>
+              <span class="text-[11px] text-amber-300 font-medium">⚠️ Đang mở file:// (YouTube chặn phát nhúng trực tiếp)</span>
+              <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
+                <a href="${lesson.video_lab.youtube_url}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow flex items-center gap-1 transition">
+                  ▶ Xem trên YouTube ↗
+                </a>
+                <button onclick="forceIframeTab1('${videoId}')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 text-xs font-bold transition">
+                  📺 Thử phát nhúng
+                </button>
+                <button onclick="openLocalServerGuideModal()" class="px-2.5 py-1.5 rounded-lg bg-indigo-600/40 hover:bg-indigo-600/60 border border-indigo-500/40 text-indigo-200 text-xs font-bold transition">
+                  🚀 Chạy Localhost
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        return `<iframe class="w-full h-full" src="${embedUrl}" title="${lesson.video_lab.name}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
+      }
+    }
+
+    function forceIframeTab1(videoId) {
+      window.forceIframeModeTab1 = true;
+      const container = document.getElementById('tab1-video-container');
+      if (container) {
+        container.innerHTML = `<iframe class="w-full h-full" src="${getEmbedUrl(videoId, true)}" title="Video thí nghiệm" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
+      }
+    }
+
+    function updateVideoLabPoster(lesson, videoId) {
+      const poster = document.getElementById('video-lab-poster');
+      const posterTitle = document.getElementById('video-lab-poster-title');
+      const playBtn = document.getElementById('video-lab-poster-play-btn');
+      const iframe = document.getElementById('video-lab-iframe');
+
+      if (poster && posterTitle && playBtn) {
+        poster.style.backgroundImage = "url('https://img.youtube.com/vi/" + videoId + "/hqdefault.jpg')";
+        posterTitle.textContent = lesson.video_lab.name;
+        playBtn.href = 'https://www.youtube.com/watch?v=' + videoId;
+
+        if (window.location.protocol === 'file:' && !window.forceIframeModeTab2) {
+          poster.classList.remove('hidden');
+          if (iframe) iframe.classList.add('hidden');
+        } else {
+          poster.classList.add('hidden');
+          if (iframe) iframe.classList.remove('hidden');
+        }
+      }
+    }
+
+    function toggleForceIframeTab2() {
+      window.forceIframeModeTab2 = true;
+      const poster = document.getElementById('video-lab-poster');
+      const iframe = document.getElementById('video-lab-iframe');
+      if (poster) poster.classList.add('hidden');
+      if (iframe) {
+        iframe.classList.remove('hidden');
+        const lesson = COURSE_DATA.find(l => l.lesson_id === currentLessonId);
+        if (lesson) {
+          iframe.src = getEmbedUrl(currentActiveVideoId || lesson.video_lab.youtube_id, true);
+        }
+      }
+    }
+
+    function loadVideoLab(lessonId) {
       currentLessonId = lessonId;
       const lesson = COURSE_DATA.find(l => l.lesson_id === lessonId);
-      if (!lesson) return;
+      if (!lesson || !lesson.video_lab) return;
+      currentActiveVideoId = lesson.video_lab.youtube_id;
 
-      document.getElementById('full-lab3d-select').value = String(lessonId);
-      document.getElementById('full-lab3d-exp-name').textContent = lesson.lab3d_meta.name;
-      document.getElementById('full-lab3d-exp-desc').textContent = lesson.lab3d_meta.desc;
-      document.getElementById('full-lab3d-equation').innerHTML = lesson.lab3d_meta.equation;
-      document.getElementById('full-lab3d-badge').textContent = `🔬 ${lesson.title} — ${lesson.lab3d_meta.name}`;
+      const sel = document.getElementById('full-lab3d-select');
+      if (sel) sel.value = String(lessonId);
 
-      const btnsEl = document.getElementById('full-lab3d-buttons');
-      btnsEl.innerHTML = lesson.lab3d_meta.actions.map(act => `
-        <button onclick="fullLab3D.triggerAction('${act.id}')" class="w-full text-left px-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs md:text-sm font-bold shadow transition border border-indigo-400/30">
-          ${act.label}
-        </button>
-      `).join('');
-
-      const wrap = document.getElementById('full-lab3d-canvas-wrap');
-      const status = document.getElementById('full-lab3d-status');
-      const teleEl = document.getElementById('full-lab3d-telemetry');
-      if (!fullLab3D) {
-        fullLab3D = new Lab3DSimulator(wrap, status, null, teleEl);
-      } else {
-        fullLab3D.telemetryEl = teleEl;
-        fullLab3D.resize();
+      // Set main video iframe and poster
+      const iframe = document.getElementById('video-lab-iframe');
+      if (iframe) {
+        iframe.src = getEmbedUrl(lesson.video_lab.youtube_id);
       }
-      fullLab3D.loadLesson(lessonId);
-      renderMathInContainer(document.getElementById('full-lab3d-equation'));
+      updateVideoLabPoster(lesson, lesson.video_lab.youtube_id);
+
+      // Direct YouTube link
+      const directLink = document.getElementById('video-direct-link');
+      if (directLink) {
+        directLink.href = lesson.video_lab.youtube_url;
+      }
+
+      // Title & labels
+      const expName = document.getElementById('video-lab-exp-name');
+      if (expName) expName.textContent = lesson.video_lab.name;
+
+      const sgkRef = document.getElementById('video-lab-sgk-ref');
+      if (sgkRef) sgkRef.textContent = lesson.video_lab.sgk_ref;
+
+      const apparatus = document.getElementById('video-lab-apparatus');
+      if (apparatus) apparatus.textContent = lesson.video_lab.apparatus;
+
+      const chemicals = document.getElementById('video-lab-chemicals');
+      if (chemicals) chemicals.textContent = lesson.video_lab.chemicals;
+
+      const steps = document.getElementById('video-lab-steps');
+      if (steps) {
+        steps.innerHTML = lesson.video_lab.steps.map(s => `<li>${s}</li>`).join('');
+      }
+
+      const phenom = document.getElementById('video-lab-phenomenon');
+      if (phenom) phenom.textContent = lesson.video_lab.phenomenon;
+
+      const eqEl = document.getElementById('video-lab-equation');
+      if (eqEl) {
+        eqEl.innerHTML = lesson.video_lab.equation;
+        renderMathInContainer(eqEl);
+      }
+
+      const safety = document.getElementById('video-lab-safety');
+      if (safety) safety.innerHTML = lesson.video_lab.safety_note;
+
+      // Extra video buttons if available
+      const extraBtns = document.getElementById('video-extra-buttons');
+      if (extraBtns) {
+        let btnsHtml = `
+          <button onclick="setVideoPlayer('${lesson.video_lab.youtube_id}', this)" class="video-switch-btn px-3 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-bold shadow transition">
+            🎬 Video chính
+          </button>
+        `;
+        if (lesson.video_lab.extra_videos && lesson.video_lab.extra_videos.length > 0) {
+          lesson.video_lab.extra_videos.forEach(ev => {
+            btnsHtml += `
+              <button onclick="setVideoPlayer('${ev.id}', this)" class="video-switch-btn px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-bold transition">
+                ▶️ ${ev.title}
+              </button>
+            `;
+          });
+        }
+        extraBtns.innerHTML = btnsHtml;
+      }
     }
 
-    function resetCurrentLab3D() {
-      const val = parseInt(document.getElementById('full-lab3d-select').value) || 2;
-      loadLab3DScene(val, 'full');
+    // Compatibility alias for any existing calls
+    function loadLab3DScene(lessonId, mode = 'full') {
+      loadVideoLab(lessonId);
+    }
+
+    function setVideoPlayer(videoId, btnEl) {
+      currentActiveVideoId = videoId;
+      const lesson = COURSE_DATA.find(l => l.lesson_id === currentLessonId);
+      const iframe = document.getElementById('video-lab-iframe');
+      if (iframe) {
+        iframe.src = getEmbedUrl(videoId, true);
+      }
+      if (lesson) {
+        updateVideoLabPoster(lesson, videoId);
+      }
+      const directLink = document.getElementById('video-direct-link');
+      if (directLink) {
+        directLink.href = 'https://www.youtube.com/watch?v=' + videoId;
+      }
+      if (btnEl) {
+        document.querySelectorAll('.video-switch-btn').forEach(b => {
+          b.className = 'video-switch-btn px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-bold transition';
+        });
+        btnEl.className = 'video-switch-btn px-3 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-bold shadow transition';
+      }
+    }
+
+    function openLocalServerGuideModal() {
+      const modal = document.getElementById('localhost-guide-modal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeLocalServerGuideModal() {
+      const modal = document.getElementById('localhost-guide-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function copyCurrentVideoLink() {
+      const lesson = COURSE_DATA.find(l => l.lesson_id === currentLessonId);
+      if (lesson && lesson.video_lab && lesson.video_lab.youtube_url) {
+        navigator.clipboard.writeText(lesson.video_lab.youtube_url).then(() => {
+          alert('Đã sao chép link YouTube thí nghiệm: ' + lesson.video_lab.youtube_url);
+        }).catch(() => {
+          prompt('Link YouTube của bài học:', lesson.video_lab.youtube_url);
+        });
+      }
+    }
+
+    function openDirectVideo(url, lessonId) {
+      if (lessonId) {
+        loadVideoLab(lessonId);
+      }
+      window.open(url, '_blank');
     }
 
     function renderLab3DCardsGrid() {
       const grid = document.getElementById('lab3d-cards-grid');
+      if (!grid) return;
       grid.innerHTML = COURSE_DATA.map(l => `
-        <div onclick="loadLab3DScene(${l.lesson_id}, 'full'); window.scrollTo({top: 0, behavior: 'smooth'});" class="cursor-pointer p-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-indigo-50 hover:border-indigo-300 transition flex flex-col justify-between">
-          <div>
-            <span class="px-2 py-0.5 rounded bg-indigo-600 text-white text-[11px] font-extrabold">${l.title}</span>
-            <h4 class="text-sm font-bold text-slate-900 mt-2">${l.lab3d_meta.name}</h4>
+        <div onclick="openDirectVideo('${l.video_lab.youtube_url}', ${l.lesson_id})" class="group cursor-pointer rounded-2xl border-2 border-slate-200 bg-white hover:border-rose-500 hover:shadow-2xl transition-all duration-300 flex flex-col overflow-hidden transform hover:-translate-y-1">
+          <div class="relative aspect-video w-full bg-slate-900 overflow-hidden">
+            <img src="https://img.youtube.com/vi/${l.video_lab.youtube_id}/mqdefault.jpg" alt="${l.video_lab.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent"></div>
+            
+            <div class="absolute top-2 left-2 px-2.5 py-0.5 rounded-md bg-rose-600 text-white text-[11px] font-extrabold shadow-md flex items-center gap-1">
+              <span>${l.title}</span>
+            </div>
+
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div class="w-12 h-12 rounded-full bg-rose-600 text-white flex items-center justify-center shadow-2xl group-hover:scale-115 group-hover:bg-rose-500 transition duration-300">
+                <svg class="w-6 h-6 fill-current ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              </div>
+            </div>
+
+            <div class="absolute bottom-2 left-2 right-2 flex items-center justify-between text-[11px] text-white">
+              <span class="px-2 py-0.5 rounded bg-black/70 backdrop-blur-sm font-semibold flex items-center gap-1 text-[10px]">
+                <svg class="w-3 h-3 fill-current text-rose-500" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                YouTube HD
+              </span>
+              <span class="px-2 py-0.5 rounded bg-rose-600 text-white font-extrabold text-[10px] shadow">
+                ▶ Mở trực tiếp ↗
+              </span>
+            </div>
           </div>
-          <div class="text-xs font-bold text-indigo-600 mt-3 flex items-center justify-between">
-            <span>Mở mô phỏng 3D</span>
-            <span>→</span>
+          
+          <div class="p-3.5 flex-1 flex flex-col justify-between">
+            <h4 class="text-xs font-bold text-slate-900 line-clamp-2 group-hover:text-rose-600 transition leading-snug">${l.video_lab.name}</h4>
+            
+            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+              <span class="text-xs font-extrabold text-rose-600 flex items-center gap-1 group-hover:underline">
+                <span>Xem video trực tiếp</span>
+                <span>↗</span>
+              </span>
+              <button onclick="event.stopPropagation(); loadVideoLab(${l.lesson_id}); window.scrollTo({top: 0, behavior: 'smooth'});" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold transition" title="Xem dụng cụ, hóa chất và PTHH">
+                📖 Chi tiết bài học
+              </button>
+            </div>
           </div>
         </div>
       `).join('');
@@ -4406,12 +3251,17 @@
       const quizSelect = document.getElementById('quiz-lesson-filter');
 
       COURSE_DATA.forEach(l => {
-        const opt = `<option value="${l.lesson_id}">${l.title} – ${l.lab3d_meta.name.replace('Thí nghiệm 3D: ', '')}</option>`;
+        const opt = `<option value="${l.lesson_id}">${l.title} – ${l.video_lab.name.replace('Thí nghiệm: ', '')}</option>`;
         labSelect.insertAdjacentHTML('beforeend', opt);
         quizSelect.insertAdjacentHTML('beforeend', `<option value="${l.lesson_id}">${l.title} (10 bài tập)</option>`);
       });
 
+      if (window.location.protocol === 'file:') {
+        const banner = document.getElementById('file-protocol-banner');
+        if (banner) banner.classList.remove('hidden');
+      }
       selectLesson(2);
+      loadVideoLab(2);
       renderLab3DCardsGrid();
       computeMol();
       computeDensity();
@@ -4431,5 +3281,80 @@
       });
     });
   </script>
+
+  <!-- MODAL HƯỚNG DẪN KHẮC PHỤC YOUTUBE ERROR 153 -->
+  <div id="localhost-guide-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 text-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">📺</span>
+          <h3 class="text-lg font-extrabold text-white">Khắc Phục Lỗi YouTube Error 153</h3>
+        </div>
+        <button onclick="closeLocalServerGuideModal()" class="text-slate-400 hover:text-white text-lg font-bold p-1">✕</button>
+      </div>
+
+      <div class="space-y-4 text-xs md:text-sm text-slate-300 leading-relaxed">
+        <div class="p-3.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-200">
+          <strong class="text-amber-300">🔍 Vì sao bị lỗi Error 153?</strong><br/>
+          YouTube yêu cầu bắt buộc: Mọi video nhúng phải có <code>Referrer / Origin</code> hợp lệ từ máy chủ web. Khi mở tệp HTML trực tiếp bằng chuột (đường dẫn bắt đầu bằng <code>file:///</code>), trình duyệt không gửi thông tin này khiến YouTube chặn và báo <strong>"Video player configuration error Error 153"</strong>.
+        </div>
+
+        <div class="space-y-3">
+          <h4 class="font-extrabold text-teal-300 text-sm uppercase tracking-wide">3 Cách Khắc Phục Triệt Để:</h4>
+
+          <!-- Cách 1 -->
+          <div class="p-4 rounded-xl bg-slate-800/90 border border-slate-700 space-y-2">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-emerald-600 text-white font-extrabold text-xs">CÁCH 1 (Khuyên dùng - 1 Click)</span>
+              <span class="font-bold text-white text-xs md:text-sm">Chạy file tự động CHAY-UNG-DUNG.bat</span>
+            </div>
+            <p class="text-xs text-slate-300">
+              Vào thư mục ứng dụng <code>d:\APP-HOC-TAP\on-tap-hoa-8\</code> và nhấp đúp chuột vào tệp <strong class="text-white font-mono bg-black/40 px-1 rounded">CHAY-UNG-DUNG.bat</strong>. Trình duyệt sẽ tự động mở <code>http://localhost:8080</code> và phát toàn bộ 11 video thí nghiệm mượt mà ngay trong giao diện ứng dụng!
+            </p>
+          </div>
+
+          <!-- Cách 2 -->
+          <div class="p-4 rounded-xl bg-slate-800/90 border border-slate-700 space-y-2">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-indigo-600 text-white font-extrabold text-xs">CÁCH 2</span>
+              <span class="font-bold text-white text-xs md:text-sm">Chạy lệnh qua Terminal / Command Prompt</span>
+            </div>
+            <p class="text-xs text-slate-300">
+              Mở PowerShell hoặc Command Prompt tại thư mục dự án và chạy một trong 2 lệnh sau:
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] font-mono">
+              <div class="bg-black/60 p-2.5 rounded-lg border border-slate-700 flex items-center justify-between">
+                <span>python -m http.server 8080</span>
+                <button onclick="navigator.clipboard.writeText('python -m http.server 8080'); alert('Đã sao chép lệnh!');" class="text-xs text-teal-400 hover:text-teal-300">Sao chép</button>
+              </div>
+              <div class="bg-black/60 p-2.5 rounded-lg border border-slate-700 flex items-center justify-between">
+                <span>node server.js</span>
+                <button onclick="navigator.clipboard.writeText('node server.js'); alert('Đã sao chép lệnh!');" class="text-xs text-teal-400 hover:text-teal-300">Sao chép</button>
+              </div>
+            </div>
+            <p class="text-xs text-slate-400">Sau đó mở trình duyệt truy cập: <a href="http://localhost:8080" target="_blank" class="text-indigo-400 underline font-bold">http://localhost:8080</a></p>
+          </div>
+
+          <!-- Cách 3 -->
+          <div class="p-4 rounded-xl bg-slate-800/90 border border-slate-700 space-y-2">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-rose-600 text-white font-extrabold text-xs">CÁCH 3</span>
+              <span class="font-bold text-white text-xs md:text-sm">Bấm "Xem trên YouTube ↗"</span>
+            </div>
+            <p class="text-xs text-slate-300">
+              Nếu mở trực tiếp từ file, bạn chỉ cần bấm nút đỏ <strong class="text-rose-400">"Xem trực tiếp trên YouTube ↗"</strong> ở dưới mỗi bài học để xem trọn vẹn video chất lượng cao kèm thuyết minh SGK.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-2 border-t border-slate-800">
+        <button onclick="closeLocalServerGuideModal()" class="px-5 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold transition">
+          Đã hiểu & Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
