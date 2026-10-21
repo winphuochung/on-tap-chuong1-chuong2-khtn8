@@ -2,9 +2,20 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>Ứng Dụng Học Tập & Video Thí Nghiệm Hóa Học 8 (Bài 2 - Bài 12)</title>
+
+  <!-- PWA & Hỗ Trợ Đa Thiết Bị: Android, iOS, iPadOS, macOS, Windows, Linux -->
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Hóa Học 8" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="format-detection" content="telephone=no" />
+  <link rel="apple-touch-icon" href="logo.png" />
+  <link rel="icon" type="image/png" href="logo.png" />
+  <link rel="manifest" href="manifest.json" />
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- KaTeX for LaTeX Equations -->
@@ -41,6 +52,40 @@
       width: 100%;
       height: 100%;
       border: 0;
+    }
+
+    /* Tối ưu hóa đa thiết bị: iPhone, iPad, Android, Mac, Laptop */
+    :root {
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+      --sal: env(safe-area-inset-left, 0px);
+      --sar: env(safe-area-inset-right, 0px);
+    }
+    html, body {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      padding-top: var(--sat);
+      padding-bottom: var(--sab);
+      padding-left: var(--sal);
+      padding-right: var(--sar);
+    }
+    /* Chống tự động phóng to khó chịu trên iOS Safari khi chạm vào ô nhập */
+    @media screen and (max-width: 768px) {
+      input, select, textarea {
+        font-size: 16px !important;
+      }
+    }
+    /* Cuộn quán tính mượt mà trên màn hình cảm ứng */
+    .overflow-x-auto, .custom-scrollbar {
+      -webkit-overflow-scrolling: touch;
+    }
+    /* Thanh tab vuốt ngang mượt mà trên di động */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
   </style>
 </head>
@@ -198,20 +243,20 @@
       </div>
 
       <!-- Main Navigation Tabs -->
-      <nav class="flex flex-wrap gap-1.5 bg-slate-950/40 p-1.5 rounded-xl border border-white/10 w-full lg:w-auto">
-        <button onclick="switchMainTab('syllabus')" id="tab-btn-syllabus" class="main-tab-btn px-3.5 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 bg-white text-indigo-950 shadow">
+      <nav class="flex overflow-x-auto no-scrollbar gap-1.5 bg-slate-950/40 p-1.5 rounded-xl border border-white/10 w-full lg:w-auto scroll-smooth">
+        <button onclick="switchMainTab('syllabus')" id="tab-btn-syllabus" class="main-tab-btn shrink-0 whitespace-nowrap px-3.5 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 bg-white text-indigo-950 shadow">
           <i data-lucide="book-open" class="w-4 h-4"></i> Bài Học & Thí Nghiệm (11 Bài)
         </button>
-        <button onclick="switchMainTab('lab3d')" id="tab-btn-lab3d" class="main-tab-btn px-3.5 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 text-white/90 hover:bg-white/10">
+        <button onclick="switchMainTab('lab3d')" id="tab-btn-lab3d" class="main-tab-btn shrink-0 whitespace-nowrap px-3.5 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 text-white/90 hover:bg-white/10">
           <i data-lucide="video" class="w-4 h-4 text-rose-400"></i> Video Thí Nghiệm
         </button>
-        <button onclick="switchMainTab('widgets')" id="tab-btn-widgets" class="main-tab-btn px-3.5 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 text-white/90 hover:bg-white/10">
+        <button onclick="switchMainTab('widgets')" id="tab-btn-widgets" class="main-tab-btn shrink-0 whitespace-nowrap px-3.5 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 text-white/90 hover:bg-white/10">
           <i data-lucide="sliders" class="w-4 h-4"></i> Công Cụ & Bảng Tính Tan
         </button>
-        <button onclick="switchMainTab('quiz')" id="tab-btn-quiz" class="main-tab-btn px-3.5 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 text-white/90 hover:bg-white/10">
+        <button onclick="switchMainTab('quiz')" id="tab-btn-quiz" class="main-tab-btn shrink-0 whitespace-nowrap px-3.5 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 text-white/90 hover:bg-white/10">
           <i data-lucide="check-circle-2" class="w-4 h-4"></i> Luyện Tập (110+ Bài Tập)
         </button>
-        <button onclick="switchMainTab('exam')" id="tab-btn-exam" class="main-tab-btn px-3.5 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 text-white/90 hover:bg-white/10">
+        <button onclick="switchMainTab('exam')" id="tab-btn-exam" class="main-tab-btn shrink-0 whitespace-nowrap px-3.5 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 text-white/90 hover:bg-white/10">
           <i data-lucide="award" class="w-4 h-4"></i> Thi Thử Bấm Giờ
         </button>
       </nav>
@@ -272,7 +317,7 @@
           <div class="lg:col-span-8 flex flex-col gap-4">
             <!-- Responsive 16:9 Video Embed Container -->
             <div id="video-lab-container" class="relative rounded-2xl overflow-hidden bg-black border-2 border-slate-700 shadow-2xl aspect-video w-full">
-              <iframe id="video-lab-iframe" class="w-full h-full" src="" title="Video thí nghiệm hóa học" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+              <iframe id="video-lab-iframe" class="w-full h-full" src="" title="Video thí nghiệm hóa học" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" playsinline referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
               <!-- Poster fallback khi chạy qua file:// -->
               <div id="video-lab-poster" class="hidden absolute inset-0 bg-slate-950 flex flex-col items-center justify-center p-6 text-center z-10 bg-cover bg-center">
                 <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/85 to-slate-900/80"></div>
@@ -2532,7 +2577,7 @@
     window.forceIframeModeTab2 = false;
 
     function getEmbedUrl(videoId, autoplay = false) {
-      let url = 'https://www.youtube.com/embed/' + videoId + '?rel=0&enablejsapi=1';
+      let url = 'https://www.youtube.com/embed/' + videoId + '?rel=0&enablejsapi=1&playsinline=1';
       if (autoplay) url += '&autoplay=1';
       if (window.location.protocol.startsWith('http') && window.location.origin && window.location.origin !== 'null') {
         url += '&origin=' + encodeURIComponent(window.location.origin);
@@ -3489,6 +3534,37 @@
       }
       if (window.lucide) {
         window.lucide.createIcons();
+      }
+    }
+
+
+    // Đăng ký Service Worker cho PWA (Chạy offline và cài đặt trên Android, iOS, Mac, Windows)
+    if ('serviceWorker' in navigator && (window.location.protocol.startsWith('http') || window.location.protocol.startsWith('https'))) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then(() => {
+          console.log('PWA Service Worker registered successfully');
+        }).catch(() => {});
+      });
+    }
+
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const pwaBtn = document.getElementById('pwa-install-btn');
+      if (pwaBtn) pwaBtn.classList.remove('hidden');
+    });
+
+    function installPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            const pwaBtn = document.getElementById('pwa-install-btn');
+            if (pwaBtn) pwaBtn.classList.add('hidden');
+          }
+          deferredPrompt = null;
+        });
       }
     }
 
